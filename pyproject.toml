@@ -1,0 +1,11 @@
+[project]
+name = "superset-bi-metrics"
+description = "Apache Superset Open Source Oriented BI Metrics Test Project"
+readme = "README.md"
+dynamic = ["version", "scripts", "entry-points"]
+requires-python = ">=3.11"
+# Original Author = Apache Software Foundation
+authors = [
+    { name = "Lee-DongWook", email = "dlehddnr0713@gmail.com"}
+]
+dependencies = []
