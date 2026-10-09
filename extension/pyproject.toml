@@ -1,0 +1,5 @@
+[project]
+name="superset-bi-metrics-extension"
+version="0.1.0"
+description="Based on Apache core python package"
+readme = "README.md"
