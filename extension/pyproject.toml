@@ -3,3 +3,13 @@ name="superset-bi-metrics-extension"
 version="0.1.0"
 description="Based on Apache core python package"
 readme = "README.md"
+dependencies = [
+    "flask-appbuilder>=5.2.3",
+    "isodate>=0.7.2",
+    "pyarrow>=26.0.0",
+    "pydantic>=2.14.0",
+    "sqlalchemy>=2.1.4",
+    "sqlalchemy-utils>=0.42.1",
+    "sqlglot>=30.21.0",
+    "typing-extensions>=4.16.0",
+]
