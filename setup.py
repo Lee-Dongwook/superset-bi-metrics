@@ -1,0 +1,60 @@
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+import json
+import os
+import subprocess
+
+from setuptools import find_packages, setup
+
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+PACKAGE_JSON = os.path.join(BASE_DIR, "client", "package.json")
+
+with open(PACKAGE_JSON) as package_file:
+    version_string = json.load(package_file)["version"]
+
+def get_git_sha() -> str:
+    try:
+        output = subprocess.check_output(["git", "rev-parse", "HEAD"])
+        return output.decode().strip()
+    except Exception:
+        return ""
+
+GIT_SHA = get_git_sha()
+version_info = {"GIT_SHA": GIT_SHA, "version": version_string}
+print("-==-" * 15)
+print("VERSION: " + version_string)
+print("GIT SHA: " + GIT_SHA)
+print("-==-" * 15)
+
+VERSION_INFO_FILE = os.path.join(BASE_DIR, "core", "static", "version_info.json")
+
+with open(VERSION_INFO_FILE, "w") as version_file:
+    json.dump(version_info, version_file)
+
+version_string = version_string.replace("-dev", ".dev0")
+
+setup(
+    name="superset-bi-metrics"
+    version=version_string,
+    packages=find_packages(),
+    include_package_data=True,
+    zip_safe=False,
+    entry_points={
+        #TODO
+    },
+)
