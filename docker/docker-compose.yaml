@@ -1,0 +1,24 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:15
+    container_name: bi_metrics_db
+    environment:
+      POSTGRES_DB: bimetrics
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - db_home:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7-alpine
+    container_name: bi_metrics_redis
+    ports:
+      - "6379:6379"
+
+volumes:
+  db_home:
+    external: false
