@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "rootDir": "./src",
+    "strict": true,
+    "moduleResolution": "bundler",
+    "target": "es6",
+    "lib": ["DOM", "ESNext"],
+    "module": "esnext",
+    "outDir": "./dist",
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "types": ["node"]
+  },
+  "include": ["src/**/*"],
+  "exclude": ["src/**/*.test.ts", "dist", "lib", "node_modules"]
+}
