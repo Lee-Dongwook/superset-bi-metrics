@@ -8,4 +8,7 @@ requires-python = ">=3.11"
 authors = [
     { name = "Lee-DongWook", email = "dlehddnr0713@gmail.com"}
 ]
-dependencies = []
+dependencies = [
+    "flask>=3.1.3",
+    "sqlalchemy>=2.1.4",
+]
