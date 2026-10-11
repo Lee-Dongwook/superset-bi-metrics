@@ -9,6 +9,7 @@ authors = [
     { name = "Lee-DongWook", email = "dlehddnr0713@gmail.com"}
 ]
 dependencies = [
+    "alembic>=1.20.0",
     "celery>=5.6.3",
     "click>=8.5.0",
     "colorama>=0.4.6",
@@ -19,4 +20,5 @@ dependencies = [
     "sqlalchemy>=2.1.4",
     "sqlglot>=30.22.0",
     "statsd>=4.0.1",
+    "werkzeug>=3.1.9",
 ]
