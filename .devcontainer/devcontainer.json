@@ -1,0 +1,21 @@
+{
+  "name": "superset-bi-metrics",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": "."
+  },
+  "forwardPorts": [9001],
+  "portsAttributes": {
+    "9001": {
+      "label": "BI Metrics via Webpack Dev Server",
+      "onAutoForward": "notify",
+      "visibility": "public"
+    }
+  },
+  "remoteEnv": {},
+  "customizations": {
+    "vscode": {
+      "extensions": []
+    }
+  }
+}
