@@ -81,6 +81,15 @@ class CoreErrorFromParamsException(CoreErrorException):
             )
         )
 
+class CoreErrorsException(CoreException):
+    def __init__(
+        self, errors: list[CoreError], status: Optional[int] = None
+    ) -> None:
+        super().__init__(str(errors))
+        self.errors = errors
+        if status is not None:
+            self.status = status
+
 
 class NoDataException(CoreException):
     status = 400
