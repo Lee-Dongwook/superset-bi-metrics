@@ -1,0 +1,22 @@
+{
+  "name": "@bi-metrics/semantic",
+  "version": "0.1.0",
+  "workspaces": {
+    "packages": [
+      "rust/*",
+      "packages/*"
+    ],
+    "nohoist": [
+      "packages/semantic-client-ngx/*",
+      "**/vue/*",
+      "**/inquirer"
+    ]
+  },
+  "dependencies": {
+    "core-js": "^3.50.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^8.0.7",
+    "typescript": "^7.0.2"
+  }
+}
