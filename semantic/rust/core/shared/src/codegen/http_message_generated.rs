@@ -21,9 +21,9 @@ impl HttpCommand {
         Self::HttpQueryResult,
     ];
 
-    pub fn variant_name(self) -> Options<&'static str> {
+    pub fn variant_name(self) -> Option<&'static str> {
         match self {
-            Self::None => Some("NONE"),
+            Self::NONE => Some("NONE"),
             Self::HttpQuery => Some("HttpQuery"),
             Self::HttpResultSet => Some("HttpResultSet"),
             Self::HttpError => Some("HttpError"),
