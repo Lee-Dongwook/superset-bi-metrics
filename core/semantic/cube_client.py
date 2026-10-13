@@ -79,14 +79,14 @@ class CubeClient:
                 else:
                     description = "Building pre-aggregation cache"
                 progress_percent = 50.0
-            elif "executing" in raw_stage_name or "query" in raw_stage_name:
-                step = "EXECUTING_QUERY"
-                description = "Executing query on database"
-                progress_percent = 75.0
             elif "waiting" in raw_stage_name:
                 step = "WAITING"
                 description = "Waiting in query queue"
                 progress_percent = 20.0
+            elif "executing" in raw_stage_name or "query" in raw_stage_name:
+                step = "EXECUTING_QUERY"
+                description = "Executing query on database"
+                progress_percent = 75.0
             else:
                 step = "PROCESSING"
                 description = stage_raw.get("stage") or "Processing query"

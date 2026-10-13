@@ -38,16 +38,19 @@ func main() {
 		Handler:           mux,
 		ReadHeaderTimeout: 5 * time.Second,
 	}
+	// Shutdown doesn't track hijacked WebSocket conns; close them explicitly.
+	server.RegisterOnShutdown(hub.CloseAll)
 
 	// Listen for syscall signals for process to interrupt/quit
 	sig := make(chan os.Signal, 1)
 	signal.Notify(sig, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 
+	done := make(chan struct{})
 	go func() {
 		<-sig
 
 		// Shutdown signal with grace period of 30 seconds
-		shutdownCtx, shutdownCancel := context.WithTimeout(serverCtx, 30*time.Second)
+		shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 30*time.Second)
 		defer shutdownCancel()
 
 		go func() {
@@ -58,11 +61,12 @@ func main() {
 		}()
 
 		log.Println("Shutting down server gracefully...")
+		serverStopCtx() // stop the subscriber loop before closing its client
 		_ = redisSub.Close()
 		if err := server.Shutdown(shutdownCtx); err != nil {
-			log.Fatalf("Server shutdown failed: %v", err)
+			log.Printf("Server shutdown failed: %v", err)
 		}
-		serverStopCtx()
+		close(done)
 	}()
 
 	log.Printf("WebSocket server starting on port %s (redis: %s, channel: %s)...", cfg.Port, cfg.RedisAddr, cfg.RedisChannel)
@@ -70,7 +74,7 @@ func main() {
 		log.Fatalf("Server startup failed: %v", err)
 	}
 
-	// Wait for server context to be stopped
-	<-serverCtx.Done()
+	// Wait for shutdown to finish
+	<-done
 	log.Println("Server gracefully stopped.")
 }

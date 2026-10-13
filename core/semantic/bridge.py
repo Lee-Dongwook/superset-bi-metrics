@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 import time
 from datetime import datetime, timezone
-from typing import Any
+from typing import Any, Callable
 
 import pandas as pd
 
@@ -44,13 +44,19 @@ class CubeQueryBridge:
         query: dict[str, Any],
         poll_interval: float = 0.5,
         timeout_seconds: float = 60.0,
+        should_cancel: Callable[[], bool] | None = None,
     ) -> QueryResult:
         """Executes a Cube.js query synchronously with polling, publishing real-time
 
-        events to Redis at each stage update.
+        events to Redis at each stage update. ``should_cancel`` is checked before
+        every poll; when it returns True the query stops with ``QueryStatus.STOPPED``.
         """
         qid_str = str(query_id)
+        qid_int = int(query_id) if str(query_id).isdigit() else None
         start_time = time.time()
+
+        def elapsed() -> int:
+            return int((time.time() - start_time) * 1000)
 
         # Step 1: Emit initial dispatch event
         self.publisher.publish_stage(
@@ -64,7 +70,19 @@ class CubeQueryBridge:
         )
 
         while True:
-            elapsed_ms = int((time.time() - start_time) * 1000)
+            if should_cancel and should_cancel():
+                error_msg = "Query stopped by user cancel request"
+                self.publisher.publish_failed(
+                    channel_id=channel_id,
+                    query_id=qid_str,
+                    error=error_msg,
+                )
+                return QueryResult(
+                    status=QueryStatus.STOPPED,
+                    query_id=qid_int,
+                    total_execution_time_ms=float(elapsed()),
+                    error_message=error_msg,
+                )
 
             # Check timeout
             if time.time() - start_time > timeout_seconds:
@@ -76,14 +94,15 @@ class CubeQueryBridge:
                 )
                 return QueryResult(
                     status=QueryStatus.TIMED_OUT,
-                    query_id=int(query_id) if isinstance(query_id, int) or str(query_id).isdigit() else None,
-                    total_execution_time_ms=float(elapsed_ms),
+                    query_id=qid_int,
+                    total_execution_time_ms=float(elapsed()),
                     error_message=error_msg,
                 )
 
             try:
                 response = self.cube_client.load_query(query)
             except Exception as exc:
+                elapsed_ms = elapsed()
                 error_msg = f"Cube.js API connection error: {exc}"
                 self.publisher.publish_failed(
                     channel_id=channel_id,
@@ -92,10 +111,12 @@ class CubeQueryBridge:
                 )
                 return QueryResult(
                     status=QueryStatus.FAILED,
-                    query_id=int(query_id) if isinstance(query_id, int) or str(query_id).isdigit() else None,
+                    query_id=qid_int,
                     total_execution_time_ms=float(elapsed_ms),
                     error_message=error_msg,
                 )
+
+            elapsed_ms = elapsed()
 
             # Continue wait (e.g. pre-aggregation building, long running query)
             if response.get("error") == "Continue wait":
@@ -122,7 +143,7 @@ class CubeQueryBridge:
                 )
                 return QueryResult(
                     status=QueryStatus.FAILED,
-                    query_id=int(query_id) if isinstance(query_id, int) or str(query_id).isdigit() else None,
+                    query_id=qid_int,
                     total_execution_time_ms=float(elapsed_ms),
                     error_message=err_text,
                 )
@@ -151,7 +172,7 @@ class CubeQueryBridge:
             return QueryResult(
                 status=QueryStatus.SUCCESS,
                 statements=[statement],
-                query_id=int(query_id) if isinstance(query_id, int) or str(query_id).isdigit() else None,
+                query_id=qid_int,
                 total_execution_time_ms=float(elapsed_ms),
             )
 
@@ -181,6 +202,7 @@ class CubeAsyncQueryHandle(AsyncQueryHandle):
             query_id=self.query_id or 0,
             query=self.query,
             timeout_seconds=timeout_seconds,
+            should_cancel=lambda: self._canceled,
         )
         self.status = self._result.status
         return self._result
@@ -194,11 +216,12 @@ class CubeAsyncQueryHandle(AsyncQueryHandle):
         return self._result
 
     def cancel(self) -> bool:
+        """Requests cancellation; the bridge publishes the STOPPED event on its next poll.
+
+        Returns False if the query already finished.
+        """
+        if self.status not in (QueryStatus.PENDING, QueryStatus.RUNNING):
+            return False
         self._canceled = True
         self.status = QueryStatus.STOPPED
-        self.bridge.publisher.publish_failed(
-            channel_id=self.channel_id,
-            query_id=str(self.query_id),
-            error="Query stopped by user cancel request",
-        )
         return True

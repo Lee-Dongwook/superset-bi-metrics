@@ -11,24 +11,6 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-// QueryStage represents detailed stage progress (e.g. Cube Pre-aggregation building, SQL execution).
-type QueryStage struct {
-	Step            string  `json:"step,omitempty"`
-	Description     string  `json:"description,omitempty"`
-	ProgressPercent float64 `json:"progress_percent,omitempty"`
-	ElapsedMs       int64   `json:"elapsed_ms,omitempty"`
-}
-
-// QueryEventPayload represents the JSON payload dispatched through Redis pub/sub.
-type QueryEventPayload struct {
-	ChannelID string      `json:"channel_id"`
-	QueryID   string      `json:"query_id"`
-	Status    string      `json:"status"`
-	Stage     *QueryStage `json:"stage,omitempty"`
-	ResultURL string      `json:"result_url,omitempty"`
-	Error     interface{} `json:"error,omitempty"`
-}
-
 // Subscriber manages the Redis connection and forwards incoming pub/sub events to the WebSocket Hub.
 type Subscriber struct {
 	redisAddr string
@@ -115,11 +97,14 @@ func (s *Subscriber) consumeChannel(ctx context.Context, ch <-chan *redis.Messag
 }
 
 func (s *Subscriber) dispatchMessage(raw []byte) {
-	var event QueryEventPayload
+	// Only routing fields are decoded, so schema drift elsewhere never misroutes an event.
+	var event struct {
+		ChannelID string `json:"channel_id"`
+		QueryID   string `json:"query_id"`
+		Status    string `json:"status"`
+	}
 	if err := json.Unmarshal(raw, &event); err != nil {
-		// If payload is not QueryEventPayload JSON, fallback to broadcast
-		log.Printf("[Redis] Received non-schema message, broadcasting to all clients: %s", string(raw))
-		s.hub.Broadcast(raw)
+		log.Printf("[Redis] Dropping non-JSON message: %v", err)
 		return
 	}
 

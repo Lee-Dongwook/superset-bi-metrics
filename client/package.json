@@ -6,7 +6,7 @@
     "packages/*"
   ],
   "dependencies": {
-    "@bi-metrics/core": "file:packages/core",
+    "@bi-metrics/core": "link:packages/core",
     "@braintree/sanitize-url": "^7.1.2",
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/modifiers": "^9.0.0",

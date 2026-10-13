@@ -11,6 +11,11 @@ type ChannelMessage struct {
 	Payload   []byte
 }
 
+type clientReply struct {
+	client  *Client
+	payload []byte
+}
+
 type subscriptionReq struct {
 	client    *Client
 	channelID string
@@ -42,6 +47,9 @@ type Hub struct {
 	// Channel unsubscription requests.
 	unsubscribe chan *subscriptionReq
 
+	// Direct replies to a single client (e.g. pong).
+	reply chan *clientReply
+
 	mu sync.RWMutex
 }
 
@@ -56,6 +64,7 @@ func NewHub() *Hub {
 		unregister:      make(chan *Client),
 		subscribe:       make(chan *subscriptionReq),
 		unsubscribe:     make(chan *subscriptionReq),
+		reply:           make(chan *clientReply, 256),
 	}
 }
 
@@ -71,22 +80,17 @@ func (h *Hub) Run() {
 
 		case client := <-h.unregister:
 			h.mu.Lock()
-			if _, ok := h.clients[client]; ok {
-				delete(h.clients, client)
-				// Clean up all channel subscriptions for this client
-				for chName, subscribers := range h.channels {
-					delete(subscribers, client)
-					if len(subscribers) == 0 {
-						delete(h.channels, chName)
-					}
-				}
-				close(client.send)
-			}
+			h.removeClient(client)
 			h.mu.Unlock()
 			log.Printf("[Hub] Client disconnected. Total active clients: %d", h.ClientCount())
 
 		case req := <-h.subscribe:
 			h.mu.Lock()
+			if !h.clients[req.client] {
+				// Already evicted or unregistered; re-adding would leak a closed send channel.
+				h.mu.Unlock()
+				continue
+			}
 			if _, exists := h.channels[req.channelID]; !exists {
 				h.channels[req.channelID] = make(map[*Client]bool)
 			}
@@ -106,34 +110,70 @@ func (h *Hub) Run() {
 			h.mu.Unlock()
 			log.Printf("[Hub] Client unsubscribed from channel [%s].", req.channelID)
 
-		case cm := <-h.channelMessages:
-			h.mu.RLock()
-			subscribers, exists := h.channels[cm.ChannelID]
-			if exists {
-				for client := range subscribers {
-					select {
-					case client.send <- cm.Payload:
-					default:
-						close(client.send)
-						delete(h.clients, client)
-						delete(subscribers, client)
-					}
-				}
+		case req := <-h.reply:
+			h.mu.Lock()
+			if h.clients[req.client] {
+				h.trySend(req.client, req.payload)
 			}
-			h.mu.RUnlock()
+			h.mu.Unlock()
+
+		case cm := <-h.channelMessages:
+			h.mu.Lock()
+			for client := range h.channels[cm.ChannelID] {
+				h.trySend(client, cm.Payload)
+			}
+			h.mu.Unlock()
 
 		case message := <-h.broadcast:
-			h.mu.RLock()
+			h.mu.Lock()
 			for client := range h.clients {
-				select {
-				case client.send <- message:
-				default:
-					close(client.send)
-					delete(h.clients, client)
-				}
+				h.trySend(client, message)
 			}
-			h.mu.RUnlock()
+			h.mu.Unlock()
 		}
+	}
+}
+
+// trySend delivers without blocking the hub; a client whose buffer is full is evicted.
+// Caller must hold h.mu (write lock).
+func (h *Hub) trySend(client *Client, payload []byte) {
+	select {
+	case client.send <- payload:
+	default:
+		h.removeClient(client)
+	}
+}
+
+// removeClient drops the client from every map, then closes its send channel exactly once.
+// Caller must hold h.mu (write lock).
+func (h *Hub) removeClient(client *Client) {
+	if !h.clients[client] {
+		return
+	}
+	delete(h.clients, client)
+	for chName, subscribers := range h.channels {
+		delete(subscribers, client)
+		if len(subscribers) == 0 {
+			delete(h.channels, chName)
+		}
+	}
+	close(client.send)
+}
+
+// CloseAll disconnects every client; their WritePump sends a close frame.
+func (h *Hub) CloseAll() {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	for client := range h.clients {
+		h.removeClient(client)
+	}
+}
+
+// Reply enqueues a payload for a single client, dropped if the client is gone.
+func (h *Hub) Reply(client *Client, payload []byte) {
+	select {
+	case h.reply <- &clientReply{client: client, payload: payload}:
+	default:
 	}
 }
 

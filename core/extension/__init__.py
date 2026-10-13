@@ -15,6 +15,7 @@ except ImportError:
     def get_sqla_class() -> Any:
         return SQLAlchemy
 
+from flask_caching import Cache
 from flask_caching.backends.base import BaseCache
 from flask_migrate import Migrate
 from flask_talisman import Talisman
@@ -31,7 +32,22 @@ APP_DIR = os.path.join(os.path.dirname(__file__), os.path.pardir)
 appbuilder = AppBuilder(update_perms=False)
 celery_app = celery.Celery()
 csrf = CSRFProtect()
+db = get_sqla_class()()
 
 _event_logger: dict[str, Any] = {}
-event_logger = LocalProxy(lambda: _event_logger.get("event_logger"))
+
+
+def _get_event_logger() -> Any:
+    # API modules decorate with event_logger at import time, possibly before
+    # app init registers the configured one; fall back to the default logger.
+    if "event_logger" not in _event_logger:
+        from core.utils.log import DBEventLogger
+
+        _event_logger["event_logger"] = DBEventLogger()
+    return _event_logger["event_logger"]
+
+
+event_logger = LocalProxy(_get_event_logger)
 talisman = Talisman()
+# Chart/query result cache; app init configures it from DATA_CACHE_CONFIG.
+data_cache = Cache()

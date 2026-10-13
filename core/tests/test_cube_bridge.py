@@ -174,6 +174,35 @@ def test_cube_async_query_handle() -> None:
     assert handle.get_status() == QueryStatus.SUCCESS
     assert handle.get_result() == result
 
-    # Test cancel
-    assert handle.cancel() is True
-    assert handle.get_status() == QueryStatus.STOPPED
+    # Cancel after completion is a no-op and must not publish a contradicting event
+    assert handle.cancel() is False
+    assert handle.get_status() == QueryStatus.SUCCESS
+    mock_bridge.publisher.publish_failed.assert_not_called()
+
+
+def test_cube_query_bridge_cancel() -> None:
+    mock_client = MagicMock(spec=CubeClient)
+    mock_client.load_query.return_value = {"error": "Continue wait"}
+    mock_client.parse_stage.return_value = CubeQueryStage(step="WAITING", description="queued")
+    mock_publisher = MagicMock(spec=RedisEventPublisher)
+    bridge = CubeQueryBridge(cube_client=mock_client, publisher=mock_publisher)
+
+    polls = iter([False, True])
+    result = bridge.execute_query(
+        channel_id="chan-cancel",
+        query_id="7",
+        query={},
+        poll_interval=0,
+        should_cancel=lambda: next(polls),
+    )
+
+    assert result.status == QueryStatus.STOPPED
+    assert mock_client.load_query.call_count == 1
+    mock_publisher.publish_failed.assert_called_once()
+
+
+def test_parse_stage_waiting_for_query() -> None:
+    stage = CubeClient(base_url="http://x", api_token="t").parse_stage(
+        {"stage": {"stage": "Waiting for query"}}
+    )
+    assert stage.step == "WAITING"

@@ -111,3 +111,26 @@ func TestHubBroadcast(t *testing.T) {
 	go checkClient(c2)
 	wg.Wait()
 }
+
+// A slow client evicted via one channel must not crash sends on its other channels.
+func TestHubEvictionAcrossChannels(t *testing.T) {
+	hub := NewHub()
+	go hub.Run()
+
+	c := &Client{Hub: hub, send: make(chan []byte, 1)}
+	hub.Register(c)
+	hub.Subscribe(c, "A")
+	hub.Subscribe(c, "B")
+	hub.SendToChannel("A", []byte("1")) // fills buffer
+	hub.SendToChannel("A", []byte("2")) // evicts
+	hub.SendToChannel("B", []byte("3")) // used to panic: send on closed channel
+	hub.Subscribe(c, "C")               // must not resurrect the evicted client
+	time.Sleep(50 * time.Millisecond)
+
+	if n := hub.ClientCount(); n != 0 {
+		t.Fatalf("expected evicted client gone, got %d clients", n)
+	}
+	if n := hub.ChannelSubscribersCount("C"); n != 0 {
+		t.Fatalf("evicted client re-subscribed to C")
+	}
+}

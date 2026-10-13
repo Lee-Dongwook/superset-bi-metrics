@@ -91,7 +91,7 @@ def create_app(
 
     try:
         config_module = bi_config_module or os.environ.get(
-            "SUPERSET_CONFIG", "superset.config"
+            "SUPERSET_CONFIG", "core.config"
         )
         app.config.from_object(config_module)
 
@@ -105,7 +105,7 @@ def create_app(
         app_root = app_root.rstrip("/") or  "/"
 
         if app_root != "/":
-            if not app.config["STATIC_ASSETS_PREFIX"]:
+            if not app.config.get("STATIC_ASSETS_PREFIX"):
                 app.config["STATIC_ASSETS_PREFIX"] = app_root
             if app.config.get("APP_ICON", "").startswith("/static/"):
                 app.config["APP_ICON"] = (

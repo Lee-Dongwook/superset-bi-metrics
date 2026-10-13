@@ -3,7 +3,7 @@ from flask_babel import lazy_gettext as _
 from sqlalchemy import or_
 from sqlalchemy.orm.query import Query
 
-from core.models import CssTemplate
+from core.css.models import CssTemplate
 from core.base import BaseFilter
 
 class CssTemplateAllTextFilter(BaseFilter):
@@ -13,7 +13,7 @@ class CssTemplateAllTextFilter(BaseFilter):
     def apply(self, query: Query, value: Any) -> Query:
         if not value:
             return query
-        ilike_value = f"%{value}"
+        ilike_value = f"%{value}%"
         return query.filter(
             or_(
                 CssTemplate.template_name.ilike(ilike_value),

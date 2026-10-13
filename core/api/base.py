@@ -27,7 +27,7 @@ from sqlalchemy.orm.query import Query
 
 logger = logging.getLogger(__name__)
 
-class BaseSuperSetBiMetricsAPI():
+class BaseSuperSetBiMetricsAPI(BaseApi):
     pass
 
 
@@ -51,6 +51,12 @@ def statsd_metrics(
     best_effort: bool = False,
 ) -> Callable[..., Any]:
     def decorate(func: Callable[..., Any]) -> Callable[..., Any]:
+        @functools.wraps(func)
         def wraps(self: Any, *args: Any, **kwargs: Any) -> Response:
             func_name = func.__name__
             #TODO
+            return func(self, *args, **kwargs)
+
+        return wraps
+
+    return decorate(f) if f else decorate

@@ -5,10 +5,9 @@ use uuid::Uuid;
 
 use crate::actor::{connect_ws, Actor, ActorRequest};
 use crate::error::TransportError;
-use crate::result::QueryResult;
+use crate::result::{QueryResult, ResponseFormat};
 
 #[derive(Debug, Clone)]
-
 pub struct ClientConfig {
     pub url: url::Url,
     pub username: Option<String>,
@@ -17,6 +16,7 @@ pub struct ClientConfig {
     pub no_heartbeat_timeout: Duration,
     pub max_connect_retries: u32,
     pub connect_timeout: Duration,
+    pub response_format: ResponseFormat,
 }
 
 impl ClientConfig {
@@ -31,6 +31,7 @@ impl ClientConfig {
             no_heartbeat_timeout: Duration::from_secs(30),
             max_connect_retries: 20,
             connect_timeout: Duration::from_secs(10),
+            response_format: ResponseFormat::default(),
         }
     }
 

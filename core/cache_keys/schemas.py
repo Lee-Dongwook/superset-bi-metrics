@@ -1,10 +1,9 @@
 from marshmallow import fields, Schema, validate
 
-from core.charts.schemas import (
-    datasource_name_description,
-    datasource_type_description,
-    datasource_uid_description,
-)
+# Ported from superset/charts/schemas.py
+datasource_name_description = "The datasource name."
+datasource_type_description = "The type of dataset/datasource identified on `datasource_id`."
+datasource_uid_description = "The uid of the dataset/datasource this new chart will use. A complete datasource identification needs `datasource_uid` "
 
 from core.utils.core import DatasourceType
 

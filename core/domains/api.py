@@ -10,12 +10,15 @@ from core.api.base import BaseSuperSetBiMetricsAPI, statsd_metrics
 
 logger = logging.getLogger(__name__)
 
-class DomainRestApi:
+class DomainRestApi(BaseSuperSetBiMetricsAPI):
+    """Webserver domains used for domain sharding: GET /api/v1/domains/."""
+
+    resource_name = "domains"
     domains_schema = DomainsSchema()
     method_permission_name = MODEL_API_RW_METHOD_PERMISSION_MAP
     allow_browser_login = True
     class_permission_name="Domains"
-    openapi_spec_tag="Real Domain"
+    openapi_spec_tag="Domains"
     openapi_spec_component_schemas = (DomainsSchema,)
 
     @expose("/", methods=("GET",))

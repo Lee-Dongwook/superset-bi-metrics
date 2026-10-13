@@ -41,7 +41,7 @@ EVENT_LOGGER = DBEventLogger()
 SUPERSET_LOG_VIEW = True
 SUPERSET_SECURITY_VIEW_MENU = True
 
-BASE_DIR = str(files("superset"))
+BASE_DIR = str(files("core"))
 if "SUPERSET_HOME" in os.environ:
     DATA_DIR = os.environ["SUPERSET_HOME"]
 else:

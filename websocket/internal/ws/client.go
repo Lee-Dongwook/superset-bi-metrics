@@ -22,11 +22,6 @@ const (
 	maxMessageSize = 65536
 )
 
-var (
-	newline = []byte{'\n'}
-	space   = []byte{' '}
-)
-
 // ControlMessage represents an inbound client command (e.g., subscribe, unsubscribe).
 type ControlMessage struct {
 	Action    string `json:"action,omitempty"`
@@ -97,16 +92,11 @@ func (c *Client) ReadPump() {
 				}
 				continue
 			case "ping":
-				select {
-				case c.send <- []byte(`{"action":"pong"}`):
-				default:
-				}
+				c.Hub.Reply(c, []byte(`{"action":"pong"}`))
 				continue
 			}
 		}
-
-		// Fallback: Broadcast message
-		c.Hub.broadcast <- message
+		// Only Redis produces events; unknown client frames are ignored.
 	}
 }
 
@@ -128,26 +118,8 @@ func (c *Client) WritePump() {
 				return
 			}
 
-			w, err := c.Conn.NextWriter(websocket.TextMessage)
-			if err != nil {
-				return
-			}
-			if _, err := w.Write(message); err != nil {
-				return
-			}
-
-			// Add queued chat messages to the current websocket message.
-			n := len(c.send)
-			for i := 0; i < n; i++ {
-				if _, err := w.Write(newline); err != nil {
-					return
-				}
-				if _, err := w.Write(<-c.send); err != nil {
-					return
-				}
-			}
-
-			if err := w.Close(); err != nil {
+			// One JSON event per frame: clients JSON.parse each message.
+			if err := c.Conn.WriteMessage(websocket.TextMessage, message); err != nil {
 				return
 			}
 

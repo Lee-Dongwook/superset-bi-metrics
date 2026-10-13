@@ -84,6 +84,8 @@ class PrefixRedirectMiddleware:
                 return _response_with_location(410, None)(environ, start_response)
             #TODO
 
+        return self.wsgi_app(environ, start_response)
+
 def _response_with_location(status: int, location: Optional[str]) -> Response:
     headers: list[tuple[str, str]] = []
     if location is not None:

@@ -3,22 +3,25 @@ package handler
 import (
 	"log"
 	"net/http"
+	"slices"
+	"strings"
 
 	"github.com/Lee-Dongwook/superset-bi-metrics/websocket/internal/ws"
 	"github.com/gorilla/websocket"
 )
 
 // WebSocketHandler upgrades HTTP connections to WebSockets and binds them to the Hub.
+// allowedOrigins is "*" or a comma-separated list of exact origins.
 func WebSocketHandler(hub *ws.Hub, allowedOrigins string) http.HandlerFunc {
+	origins := strings.Split(allowedOrigins, ",")
+	for i := range origins {
+		origins[i] = strings.TrimSpace(origins[i])
+	}
 	upgrader := websocket.Upgrader{
 		ReadBufferSize:  4096,
 		WriteBufferSize: 4096,
 		CheckOrigin: func(r *http.Request) bool {
-			if allowedOrigins == "*" {
-				return true
-			}
-			origin := r.Header.Get("Origin")
-			return origin == allowedOrigins
+			return slices.Contains(origins, "*") || slices.Contains(origins, r.Header.Get("Origin"))
 		},
 	}
 

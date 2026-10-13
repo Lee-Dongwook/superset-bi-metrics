@@ -3,7 +3,6 @@ from __future__ import annotations
 import builtins
 import json
 import logging
-from re import M
 import textwrap
 import threading
 from ast import literal_eval, parse
@@ -21,6 +20,7 @@ from functools import lru_cache
 from inspect import signature
 from typing import Any, Callable, Sequence, cast, Iterator, Optional, TYPE_CHECKING, TypeVar
 from core import utils
+from core.mixins import AuditMixin
 import numpy
 import pandas as pd
 import sqlalchemy as sqla
@@ -56,14 +56,8 @@ T = TypeVar("T")
 _ENGINE_CACHE: dict[tuple[int, str, str], Engine] = {}
 _ENGINE_CACHE_LOCK = threading.Lock()
 
-class CssTemplate(AuditMixinNullable, UUIDMixin, Model):
-    __tablename__ = "css_templates"
-    id = Column(Integer, primary_key=True)
-    template_name = Column(String(256))
-    css = Column(utils.MediumText(), default="")
-
 class Slice(
-    CoreChart, SoftDeleteMixin, AuditMixinNullable, ImportExportMixin
+    CoreChart, SoftDeleteMixin, AuditMixin, ImportExportMixin
 ):
     query_context_factory: QueryContextFactory | None = None
 
@@ -195,12 +189,14 @@ class Slice(
             return self.semantic_view
         
         #TODO
+        raise NotImplementedError
     
     @staticmethod
     def iter_resolved_datasources(
         slices: Sequence[Slice],
     ) -> Iterator[DataSource | None]:
         #TODO
+        raise NotImplementedError
     
     def clone(self) -> Slice:
         return Slice(
@@ -396,6 +392,7 @@ def id_or_uuid_filter(id_or_uuid: str | int) -> BinaryExpression:
 
 def set_related_perm(_mapper: Mapper, _connection: Connection, target: Slice) -> None:
     #TODO
+    pass
 
 def event_after_chart_changed(
     _mapper: Mapper, _connection: Connection, target: Slice
