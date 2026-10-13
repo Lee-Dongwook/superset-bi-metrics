@@ -26,8 +26,7 @@
     "jsx": "react-jsx",
     "lib": ["dom", "dom.iterable", "esnext"],
     "composite": true,
-    "skipLibCheck": true,
-    "baseUrl": "."
+    "skipLibCheck": true
   },
   "include": [
     "./src/**/*",
