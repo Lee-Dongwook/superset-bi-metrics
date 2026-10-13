@@ -8,8 +8,15 @@ from wsgiref.types import StartResponse, WSGIApplication, WSGIEnvironment
 from alembic.config import Config
 from alembic.runtime.migration import MigrationContext
 from alembic.script import ScriptDirectory
+from core.extension.local_extensions_watcher import start_local_extensions_watcher_thread
+from core.initialization import AppInitializer
+from core.middleware import ExtensionCacheMiddleware, PrefixRedirectMiddleware
 from flask import Flask, Response
 from werkzeug.exceptions import NotFound
+
+from core.marshmallow_compatibility import patch_marshmallow_for_flask_appbuilder
+
+patch_marshmallow_for_flask_appbuilder()
 
 logger = logging.getLogger(__name__)
 
@@ -77,9 +84,54 @@ class AppRootMiddleware:
         return NotFound()(environ, start_response)
 
 def create_app(
-    config_module: Optional[str] = None,
-    app_root: Optional[str] = None,
+    bi_config_module: Optional[str] = None,
+    bi_app_root: Optional[str] = None,
 ) -> Flask:
     app = CoreApp(__name__)
 
-    #TODO
+    try:
+        config_module = bi_config_module or os.environ.get(
+            "SUPERSET_CONFIG", "superset.config"
+        )
+        app.config.from_object(config_module)
+
+        app_root = cast(
+            str,
+            bi_app_root
+            or os.environ.get("SUPERSET_APP_ROOT")
+            or app.config["APPLICATION_ROOT"],
+        )
+
+        app_root = app_root.rstrip("/") or  "/"
+
+        if app_root != "/":
+            if not app.config["STATIC_ASSETS_PREFIX"]:
+                app.config["STATIC_ASSETS_PREFIX"] = app_root
+            if app.config.get("APP_ICON", "").startswith("/static/"):
+                app.config["APP_ICON"] = (
+                    f"{app.config['STATIC_ASSETS_PREFIX']}{app.config['APP_ICON']}"
+                )
+            if app.config["APPLICATION_ROOT"] == "/":
+                app.config["APPLICATION_ROOT"] = app_root
+        
+        app_initializer = app.config.get("APP_INITIALIZER", AppInitializer)(app)
+        app_initializer.init_app()
+
+        app.wsgi_app = ExtensionCacheMiddleware(app.wsgi_app)
+
+        if app_root != "/":
+            app.wsgi_app = AppRootMiddleware(app.wsgi_app, app_root)
+        
+        app.wsgi_app = PrefixRedirectMiddleware(
+            app.wsgi_app,  
+            app_root,
+        )
+
+        if app.debug:
+            start_local_extensions_watcher_thread(app)
+        
+        return app
+    
+    except Exception:
+        logger.exception("Failed to create app")
+        raise
