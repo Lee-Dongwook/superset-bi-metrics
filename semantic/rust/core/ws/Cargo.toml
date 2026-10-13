@@ -1,0 +1,23 @@
+[package]
+name = "ws"
+version = "0.1.0"
+
+[dependencies]
+shared = { path = "../shared" }
+flatbuffers = "25.12.19"
+tokio = { version = "1", features = ["full"] }
+tokio-tungstenite = { version = "0.29", features = ["native-tls"] }
+futures-util = "0.3"
+bytes = "1"
+url = "2"
+percent-encoding = "2"
+base64 = "0.22"
+thiserror = "1"
+log = "0.4"
+uuid = { version = "1", features = ["v4"] }
+http = "1"
+arrow = { version = "58", default-features = false, features = ["ipc"] }
+
+[dev-dependencies]
+tokio = { version = "1", features = ["full", "test-util"] }
+env_logger = "0.11"
