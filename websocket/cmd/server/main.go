@@ -12,6 +12,7 @@ import (
 
 	"github.com/Lee-Dongwook/superset-bi-metrics/websocket/internal/config"
 	"github.com/Lee-Dongwook/superset-bi-metrics/websocket/internal/handler"
+	"github.com/Lee-Dongwook/superset-bi-metrics/websocket/internal/redis"
 	"github.com/Lee-Dongwook/superset-bi-metrics/websocket/internal/ws"
 )
 
@@ -20,6 +21,13 @@ func main() {
 
 	hub := ws.NewHub()
 	go hub.Run()
+
+	// Server run context for graceful shutdown
+	serverCtx, serverStopCtx := context.WithCancel(context.Background())
+
+	// Start Redis Pub/Sub subscriber worker
+	redisSub := redis.NewSubscriber(cfg.RedisAddr, cfg.RedisChannel, hub)
+	go redisSub.Start(serverCtx)
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/healthz", handler.HealthCheckHandler())
@@ -30,9 +38,6 @@ func main() {
 		Handler:           mux,
 		ReadHeaderTimeout: 5 * time.Second,
 	}
-
-	// Server run context for graceful shutdown
-	serverCtx, serverStopCtx := context.WithCancel(context.Background())
 
 	// Listen for syscall signals for process to interrupt/quit
 	sig := make(chan os.Signal, 1)
@@ -53,13 +58,14 @@ func main() {
 		}()
 
 		log.Println("Shutting down server gracefully...")
+		_ = redisSub.Close()
 		if err := server.Shutdown(shutdownCtx); err != nil {
 			log.Fatalf("Server shutdown failed: %v", err)
 		}
 		serverStopCtx()
 	}()
 
-	log.Printf("WebSocket server starting on port %s (redis: %s)...", cfg.Port, cfg.RedisAddr)
+	log.Printf("WebSocket server starting on port %s (redis: %s, channel: %s)...", cfg.Port, cfg.RedisAddr, cfg.RedisChannel)
 	if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		log.Fatalf("Server startup failed: %v", err)
 	}

@@ -11,8 +11,8 @@ import (
 // WebSocketHandler upgrades HTTP connections to WebSockets and binds them to the Hub.
 func WebSocketHandler(hub *ws.Hub, allowedOrigins string) http.HandlerFunc {
 	upgrader := websocket.Upgrader{
-		ReadBufferSize:  1024,
-		WriteBufferSize: 1024,
+		ReadBufferSize:  4096,
+		WriteBufferSize: 4096,
 		CheckOrigin: func(r *http.Request) bool {
 			if allowedOrigins == "*" {
 				return true
@@ -31,6 +31,11 @@ func WebSocketHandler(hub *ws.Hub, allowedOrigins string) http.HandlerFunc {
 
 		client := ws.NewClient(hub, conn)
 		hub.Register(client)
+
+		// If channel_id is provided via query parameter, auto-subscribe
+		if channelID := r.URL.Query().Get("channel_id"); channelID != "" {
+			hub.Subscribe(client, channelID)
+		}
 
 		// Start client message pumps in separate goroutines
 		go client.WritePump()

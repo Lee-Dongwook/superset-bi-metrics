@@ -1,6 +1,7 @@
 package ws
 
 import (
+	"encoding/json"
 	"log"
 	"time"
 
@@ -18,13 +19,20 @@ const (
 	pingPeriod = (pongWait * 9) / 10
 
 	// Maximum message size allowed from peer.
-	maxMessageSize = 512
+	maxMessageSize = 65536
 )
 
 var (
 	newline = []byte{'\n'}
 	space   = []byte{' '}
 )
+
+// ControlMessage represents an inbound client command (e.g., subscribe, unsubscribe).
+type ControlMessage struct {
+	Action    string `json:"action,omitempty"`
+	Type      string `json:"type,omitempty"`
+	ChannelID string `json:"channel_id,omitempty"`
+}
 
 // Client is an intermediary between the websocket connection and the hub.
 type Client struct {
@@ -68,7 +76,36 @@ func (c *Client) ReadPump() {
 			}
 			break
 		}
-		// For scaffolding demonstration: echo/broadcast received message
+
+		// Check if message is a JSON control command
+		var cmd ControlMessage
+		if err := json.Unmarshal(message, &cmd); err == nil && (cmd.Action != "" || cmd.Type != "") {
+			action := cmd.Action
+			if action == "" {
+				action = cmd.Type
+			}
+
+			switch action {
+			case "subscribe":
+				if cmd.ChannelID != "" {
+					c.Hub.Subscribe(c, cmd.ChannelID)
+				}
+				continue
+			case "unsubscribe":
+				if cmd.ChannelID != "" {
+					c.Hub.Unsubscribe(c, cmd.ChannelID)
+				}
+				continue
+			case "ping":
+				select {
+				case c.send <- []byte(`{"action":"pong"}`):
+				default:
+				}
+				continue
+			}
+		}
+
+		// Fallback: Broadcast message
 		c.Hub.broadcast <- message
 	}
 }
