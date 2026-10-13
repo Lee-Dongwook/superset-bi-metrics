@@ -106,5 +106,5 @@ make test       # 단위 테스트 실행
 
 ### 진행 중 / 예정 작업 (실시간 쿼리 스트리밍 파이프라인)
 - [x] **Step 1**: Go WebSocket 서버에 Redis Pub/Sub 워커 및 채널(`channel_id`) 기반 세션 라우팅 구현
-- [ ] **Step 2**: Python Core에서 Cube.js 비동기 쿼리(`continueWait`) 및 Pre-aggregation 워밍 상태 Redis 발행 브릿지 구현
+- [x] **Step 2**: Python Core에서 Cube.js 비동기 쿼리(`continueWait`) 및 Pre-aggregation 워밍 상태 Redis 발행 브릿지 구현
 - [ ] **Step 3**: 프론트엔드 React Hook (`useQueryProgress`, `useWebSocket`) 및 상세 진행률 UI 컴포넌트 연동

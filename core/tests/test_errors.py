@@ -9,7 +9,7 @@ from core.semantic.errors import (
     SemanticResultCompletenessError,
 )
 
-@pytest.mark.parmaterize("reason", ["incomplete", "unverified"])
+@pytest.mark.parametrize("reason", ["incomplete", "unverified"])
 def test_incomplete_error_carries_closed_reason(
     reason: SemanticResultCompletenessReason,
 ) -> None:

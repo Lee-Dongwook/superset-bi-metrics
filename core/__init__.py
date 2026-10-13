@@ -3,4 +3,4 @@ from werkzeug.local import LocalProxy
 
 flask_appbuilder.Model.__allow_unmapped__ = True
 
-results_backend = LocalProxy()
+results_backend = LocalProxy(lambda: None)
