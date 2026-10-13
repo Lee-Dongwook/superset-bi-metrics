@@ -8,6 +8,13 @@ Apache Superset과 Cube.js 오픈소스를 결합한 차세대 Headless BI Metri
 
 Apache Superset의 시각화/대시보드 기능과 Cube.js의 Semantic Layer(단일 지표 정의, Pre-aggregations 캐싱 엔진)를 결합하고, Go 기반 WebSocket 및 Redis Pub/Sub을 통해 쿼리 실행/캐시 워밍 상태를 실시간으로 스트리밍합니다.
 
+<p align="center">
+  <img src="diagram.png" alt="System Architecture Diagram" width="100%" />
+</p>
+
+<details>
+<summary><b>상세 데이터 흐름 (Text Flow)</b></summary>
+
 ```
 [ Superset Client (Web) ] 
        │ 
@@ -28,6 +35,8 @@ Apache Superset의 시각화/대시보드 기능과 Cube.js의 Semantic Layer(�
        ▼
 [ Superset Client ] ── 6. UI 실시간 갱신 (진행률 %, Pre-aggregation 워밍 상태, 완료 알림)
 ```
+
+</details>
 
 ---
 
