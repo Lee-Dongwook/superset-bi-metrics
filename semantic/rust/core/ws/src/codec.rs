@@ -1,6 +1,6 @@
 use shared::codegen::{
-    root_as_http_message, HttpCommand, HttpMessage, HttpMessageArgs, HttpQuery, HttpQueryArgs,
-    HttpQueryResultData, QueryResultFormat,
+    HttpCommand, HttpMessage, HttpMessageArgs, HttpQuery, HttpQueryArgs, HttpQueryResultData,
+    QueryResultFormat, root_as_http_message,
 };
 use shared::flatbuffers::FlatBufferBuilder;
 
@@ -71,7 +71,11 @@ pub fn decode(buf: &[u8]) -> Result<(u32, Frame), TransportError> {
                 rows.iter()
                     .map(|row| {
                         row.values()
-                            .map(|v| v.iter().map(|v| v.string_value().map(str::to_owned)).collect())
+                            .map(|v| {
+                                v.iter()
+                                    .map(|v| v.string_value().map(str::to_owned))
+                                    .collect()
+                            })
                             .unwrap_or_default()
                     })
                     .collect()
@@ -80,7 +84,10 @@ pub fn decode(buf: &[u8]) -> Result<(u32, Frame), TransportError> {
         return Ok((id, Frame::ResultSet { columns, rows }));
     }
     if let Some(err) = msg.command_as_http_error() {
-        return Ok((id, Frame::Error(err.error().unwrap_or("unknown error").to_owned())));
+        return Ok((
+            id,
+            Frame::Error(err.error().unwrap_or("unknown error").to_owned()),
+        ));
     }
     if let Some(res) = msg.command_as_http_query_result() {
         return match res.data_type() {
@@ -95,7 +102,9 @@ pub fn decode(buf: &[u8]) -> Result<(u32, Frame), TransportError> {
                 ))
             }
             HttpQueryResultData::HttpQueryResultCompleted => Ok((id, Frame::Completed)),
-            other => Err(TransportError::Protocol(format!("unknown result data {other:?}"))),
+            other => Err(TransportError::Protocol(format!(
+                "unknown result data {other:?}"
+            ))),
         };
     }
     Err(TransportError::Protocol(format!(

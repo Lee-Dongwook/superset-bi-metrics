@@ -2,9 +2,6 @@ use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub enum TransportError {
-    #[error("invalid url: {0}")]
-    InvalidUrl(String),
-
     #[error("auth header build error: {0}")]
     Auth(String),
 

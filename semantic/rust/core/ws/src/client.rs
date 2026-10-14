@@ -3,7 +3,7 @@ use std::time::Duration;
 use tokio::sync::{mpsc, oneshot};
 use uuid::Uuid;
 
-use crate::actor::{connect_ws, Actor, ActorRequest};
+use crate::actor::{Actor, ActorRequest, connect_ws};
 use crate::error::TransportError;
 use crate::result::{QueryResult, ResponseFormat};
 

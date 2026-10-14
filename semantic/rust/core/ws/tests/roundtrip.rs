@@ -13,21 +13,39 @@ fn reply(id: u32, sql: &str) -> Vec<u8> {
         (HttpCommand::HttpError, e.as_union_value())
     } else {
         let v = fbb.create_string(sql);
-        let cell = HttpColumnValue::create(&mut fbb, &HttpColumnValueArgs { string_value: Some(v) });
+        let cell = HttpColumnValue::create(
+            &mut fbb,
+            &HttpColumnValueArgs {
+                string_value: Some(v),
+            },
+        );
         let values = fbb.create_vector(&[cell]);
-        let row = HttpRow::create(&mut fbb, &HttpRowArgs { values: Some(values) });
+        let row = HttpRow::create(
+            &mut fbb,
+            &HttpRowArgs {
+                values: Some(values),
+            },
+        );
         let rows = fbb.create_vector(&[row]);
         let col = fbb.create_string("q");
         let columns = fbb.create_vector(&[col]);
         let rs = HttpResultSet::create(
             &mut fbb,
-            &HttpResultSetArgs { columns: Some(columns), rows: Some(rows) },
+            &HttpResultSetArgs {
+                columns: Some(columns),
+                rows: Some(rows),
+            },
         );
         (HttpCommand::HttpResultSet, rs.as_union_value())
     };
     let msg = HttpMessage::create(
         &mut fbb,
-        &HttpMessageArgs { message_id: id, command_type, command: Some(command), connection_id: None },
+        &HttpMessageArgs {
+            message_id: id,
+            command_type,
+            command: Some(command),
+            connection_id: None,
+        },
     );
     fbb.finish(msg, None);
     fbb.finished_data().to_vec()
@@ -43,8 +61,15 @@ async fn query_result_and_error() {
         while let Some(Ok(msg)) = ws.next().await {
             if let Message::Binary(buf) = msg {
                 let m = root_as_http_message(&buf).unwrap();
-                let sql = m.command_as_http_query().unwrap().query().unwrap().to_owned();
-                ws.send(Message::Binary(reply(m.message_id(), &sql).into())).await.unwrap();
+                let sql = m
+                    .command_as_http_query()
+                    .unwrap()
+                    .query()
+                    .unwrap()
+                    .to_owned();
+                ws.send(Message::Binary(reply(m.message_id(), &sql).into()))
+                    .await
+                    .unwrap();
             }
         }
     });
@@ -67,5 +92,8 @@ async fn query_result_and_error() {
     }
 
     client.close();
-    assert!(matches!(client.query("x").await, Err(TransportError::Closed)));
+    assert!(matches!(
+        client.query("x").await,
+        Err(TransportError::Closed)
+    ));
 }

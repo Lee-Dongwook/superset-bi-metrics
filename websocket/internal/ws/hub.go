@@ -5,10 +5,10 @@ import (
 	"sync"
 )
 
-// ChannelMessage contains a payload targeted at a specific channel_id.
-type ChannelMessage struct {
-	ChannelID string
-	Payload   []byte
+// channelMessage contains a payload targeted at a specific channel_id.
+type channelMessage struct {
+	channelID string
+	payload   []byte
 }
 
 type clientReply struct {
@@ -33,7 +33,7 @@ type Hub struct {
 	broadcast chan []byte
 
 	// Inbound targeted messages for specific channels.
-	channelMessages chan *ChannelMessage
+	channelMessages chan *channelMessage
 
 	// Register requests from clients.
 	register chan *Client
@@ -59,7 +59,7 @@ func NewHub() *Hub {
 		clients:         make(map[*Client]bool),
 		channels:        make(map[string]map[*Client]bool),
 		broadcast:       make(chan []byte, 256),
-		channelMessages: make(chan *ChannelMessage, 256),
+		channelMessages: make(chan *channelMessage, 256),
 		register:        make(chan *Client),
 		unregister:      make(chan *Client),
 		subscribe:       make(chan *subscriptionReq),
@@ -119,8 +119,8 @@ func (h *Hub) Run() {
 
 		case cm := <-h.channelMessages:
 			h.mu.Lock()
-			for client := range h.channels[cm.ChannelID] {
-				h.trySend(client, cm.Payload)
+			for client := range h.channels[cm.channelID] {
+				h.trySend(client, cm.payload)
 			}
 			h.mu.Unlock()
 
@@ -211,9 +211,9 @@ func (h *Hub) Unsubscribe(client *Client, channelID string) {
 
 // SendToChannel sends a message to all clients subscribed to a specific channel ID.
 func (h *Hub) SendToChannel(channelID string, payload []byte) {
-	h.channelMessages <- &ChannelMessage{
-		ChannelID: channelID,
-		Payload:   payload,
+	h.channelMessages <- &channelMessage{
+		channelID: channelID,
+		payload:   payload,
 	}
 }
 

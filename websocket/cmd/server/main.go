@@ -5,7 +5,6 @@ import (
 	"errors"
 	"log"
 	"net/http"
-	"os"
 	"os/signal"
 	"syscall"
 	"time"
@@ -16,18 +15,20 @@ import (
 	"github.com/Lee-Dongwook/superset-bi-metrics/websocket/internal/ws"
 )
 
+const shutdownTimeout = 30 * time.Second
+
 func main() {
 	cfg := config.LoadConfig()
+
+	// Canceled on the first termination signal; stops the Redis subscriber loop.
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
+	defer stop()
 
 	hub := ws.NewHub()
 	go hub.Run()
 
-	// Server run context for graceful shutdown
-	serverCtx, serverStopCtx := context.WithCancel(context.Background())
-
-	// Start Redis Pub/Sub subscriber worker
 	redisSub := redis.NewSubscriber(cfg.RedisAddr, cfg.RedisChannel, hub)
-	go redisSub.Start(serverCtx)
+	go redisSub.Start(ctx)
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/healthz", handler.HealthCheckHandler())
@@ -41,40 +42,24 @@ func main() {
 	// Shutdown doesn't track hijacked WebSocket conns; close them explicitly.
 	server.RegisterOnShutdown(hub.CloseAll)
 
-	// Listen for syscall signals for process to interrupt/quit
-	sig := make(chan os.Signal, 1)
-	signal.Notify(sig, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
-
-	done := make(chan struct{})
 	go func() {
-		<-sig
-
-		// Shutdown signal with grace period of 30 seconds
-		shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 30*time.Second)
-		defer shutdownCancel()
-
-		go func() {
-			<-shutdownCtx.Done()
-			if errors.Is(shutdownCtx.Err(), context.DeadlineExceeded) {
-				log.Fatal("Graceful shutdown timed out.. forcing exit.")
-			}
-		}()
-
-		log.Println("Shutting down server gracefully...")
-		serverStopCtx() // stop the subscriber loop before closing its client
-		_ = redisSub.Close()
-		if err := server.Shutdown(shutdownCtx); err != nil {
-			log.Printf("Server shutdown failed: %v", err)
+		log.Printf("WebSocket server starting on port %s (redis: %s, channel: %s)...", cfg.Port, cfg.RedisAddr, cfg.RedisChannel)
+		if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			log.Fatalf("Server startup failed: %v", err)
 		}
-		close(done)
 	}()
 
-	log.Printf("WebSocket server starting on port %s (redis: %s, channel: %s)...", cfg.Port, cfg.RedisAddr, cfg.RedisChannel)
-	if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-		log.Fatalf("Server startup failed: %v", err)
-	}
+	<-ctx.Done()
+	stop() // a second signal now kills the process immediately
+	log.Println("Shutting down server gracefully...")
 
-	// Wait for shutdown to finish
-	<-done
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
+	defer cancel()
+	if err := server.Shutdown(shutdownCtx); err != nil {
+		log.Printf("Server shutdown failed: %v", err)
+	}
+	if err := redisSub.Close(); err != nil {
+		log.Printf("Redis client close failed: %v", err)
+	}
 	log.Println("Server gracefully stopped.")
 }

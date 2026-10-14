@@ -9,13 +9,13 @@ use base64::Engine;
 use futures_util::{SinkExt, StreamExt};
 use tokio::net::TcpStream;
 use tokio::sync::{mpsc, oneshot};
-use tokio::time::{interval, sleep, timeout, Instant};
+use tokio::time::{Instant, interval, sleep, timeout};
 use tokio_tungstenite::tungstenite::client::IntoClientRequest;
 use tokio_tungstenite::tungstenite::handshake::client::Request;
-use tokio_tungstenite::tungstenite::http::header::{AUTHORIZATION, SERVER};
 use tokio_tungstenite::tungstenite::http::HeaderValue;
+use tokio_tungstenite::tungstenite::http::header::{AUTHORIZATION, SERVER};
 use tokio_tungstenite::tungstenite::{self, Message};
-use tokio_tungstenite::{connect_async, MaybeTlsStream, WebSocketStream};
+use tokio_tungstenite::{MaybeTlsStream, WebSocketStream, connect_async};
 
 use crate::client::ClientConfig;
 use crate::codec::{self, Frame};
@@ -53,7 +53,12 @@ pub async fn connect_ws(
 ) -> Result<(WsStream, Option<String>), TransportError> {
     let mut attempt = 0u32;
     loop {
-        let err = match timeout(cfg.connect_timeout, connect_async(build_request(cfg, process_id)?)).await {
+        let err = match timeout(
+            cfg.connect_timeout,
+            connect_async(build_request(cfg, process_id)?),
+        )
+        .await
+        {
             Ok(Ok((ws, resp))) => {
                 let version = resp
                     .headers()
@@ -263,7 +268,9 @@ fn read_arrow(data: &[u8], acc: &mut ArrowAcc) -> Result<(), TransportError> {
 fn finish_arrow(acc: &mut ArrowAcc) -> ResultData {
     let acc = std::mem::take(acc);
     ResultData::Arrow {
-        schema: acc.schema.unwrap_or_else(|| arrow::datatypes::Schema::empty().into()),
+        schema: acc
+            .schema
+            .unwrap_or_else(|| arrow::datatypes::Schema::empty().into()),
         batches: acc.batches,
     }
 }

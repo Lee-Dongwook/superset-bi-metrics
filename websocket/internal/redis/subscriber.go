@@ -3,7 +3,6 @@ package redis
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"log"
 	"time"
 
@@ -121,8 +120,5 @@ func (s *Subscriber) dispatchMessage(raw []byte) {
 
 // Close closes the Redis client connection.
 func (s *Subscriber) Close() error {
-	if s.client != nil {
-		return s.client.Close()
-	}
-	return errors.New("client is nil")
+	return s.client.Close()
 }

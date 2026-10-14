@@ -11,7 +11,7 @@ build:
 	go build -o $(BIN_DIR)/$(APP_NAME) ./cmd/server
 
 test:
-	go test -v ./...
+	go test -race -v ./...
 
 tidy:
 	go mod tidy
