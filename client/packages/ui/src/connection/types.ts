@@ -1,4 +1,4 @@
-import { ClientInstance } from "./ClientFactory";
+import type { ClientInstance } from "./ClientFactory";
 
 export type Body = RequestInit["body"];
 export type Cache = RequestInit["cache"];

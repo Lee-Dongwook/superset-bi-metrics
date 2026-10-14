@@ -1,1 +1,2 @@
-export * from "./useEffectEvent";
+export { default as useEffectEvent } from "./useEffectEvent";
+export * from "./useDebounceValue";

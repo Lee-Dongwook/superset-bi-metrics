@@ -28,16 +28,6 @@
     "composite": true,
     "skipLibCheck": true
   },
-  "include": [
-    "./src/**/*",
-    "./spec/**/*",
-    "./plugins/**/*",
-    "./packages/**/*",
-    "./scripts/**/*",
-    "./.storybook/**/*",
-    "./webpack.config.js",
-    "./webpack*.js",
-    "./package.json"
-  ],
+  "include": ["./src/**/*", "./e2e/**/*"],
   "exclude": []
 }

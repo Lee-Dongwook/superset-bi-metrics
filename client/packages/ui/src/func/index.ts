@@ -3,11 +3,11 @@ import Mexp from "math-expression-evaluator";
 const mexp = new Mexp();
 
 const REPLACE_OPERATORS: [RegExp, string][] = [
-  [new RegExp(/==/g), "Eq"],
-  [new RegExp(/>=/g), "Gte"],
-  [new RegExp(/<=/g), "Lte"],
-  [new RegExp(/>/g), "Gt"],
-  [new RegExp(/</g), "Lt"],
+  [/==/g, "Eq"],
+  [/>=/g, "Gte"],
+  [/<=/g, "Lte"],
+  [/>/g, "Gt"],
+  [/</g, "Lt"],
 ];
 
 const TOKENS = [
@@ -82,8 +82,8 @@ const TOKENS = [
 export function evalExpression(expression: string, value: number): number {
   let parsedExpression = expression;
 
-  REPLACE_OPERATORS.forEach(([key, value]) => {
-    parsedExpression = parsedExpression.replace(key, value);
+  REPLACE_OPERATORS.forEach(([pattern, operator]) => {
+    parsedExpression = parsedExpression.replace(pattern, operator);
   });
 
   const subExpressions = String(parsedExpression).split("=");
@@ -96,7 +96,7 @@ export function evalExpression(expression: string, value: number): number {
 export function isValidExpression(expression: string): boolean {
   try {
     evalExpression(expression, 0);
-  } catch (err) {
+  } catch {
     return false;
   }
   return true;

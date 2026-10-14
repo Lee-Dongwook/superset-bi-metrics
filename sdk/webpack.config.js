@@ -11,7 +11,7 @@ module.exports = {
     },
   },
   devtool: "source-map",
-  moudle: {
+  module: {
     rules: [
       {
         test: /\.[tj]s$/,

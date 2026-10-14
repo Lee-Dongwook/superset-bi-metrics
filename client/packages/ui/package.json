@@ -1,42 +1,29 @@
 {
   "name": "@bi-metrics/ui",
+  "version": "0.1.0",
   "files": [
-    "esm",
     "lib"
   ],
   "sideEffects": false,
   "main": "lib/index.js",
-  "module": "esm/index.js",
+  "types": "lib/index.d.ts",
   "exports": {
     ".": {
-      "import": "./esm/index.js",
-      "require": "./lib/index.js",
-      "types": "./lib/index.d.ts"
-    },
-    "./components/*": {
-      "import": "./esm/components/*/index.js",
-      "require": "./lib/components/*/index.js",
-      "types": "./lib/components/*/index.d.ts"
-    },
-    "./components": {
-      "import": "./esm/components/index.js",
-      "require": "./lib/components/index.js",
-      "types": "./lib/components/index.d.ts"
-    },
-    "./utils/*": {
-      "import": "./esm/utils/*.js",
-      "require": "./lib/utils/*.js",
-      "types": "./lib/utils/*.d.ts"
+      "types": "./lib/index.d.ts",
+      "default": "./lib/index.js"
     }
   },
   "publishConfig": {
     "access": "public"
   },
+  "scripts": {
+    "clean": "rm -rf lib tsconfig.tsbuildinfo",
+    "build": "pnpm clean && tsc --build",
+    "typecheck": "tsc --noEmit"
+  },
   "dependencies": {
     "@babel/runtime": "^8.0.7",
     "@braintree/sanitize-url": "^7.1.2",
-    "@types/d3-format": "^3.0.4",
-    "@types/json-bigint": "^1.0.4",
     "ace-builds": "^1.44.0",
     "ag-grid-community": "^36.2.0",
     "brace": "^0.11.1",
@@ -52,6 +39,10 @@
     "react-table": "^7.8.0"
   },
   "devDependencies": {
-    "@types/lodash-es": "^4.17.12"
+    "@types/d3-format": "^3.0.4",
+    "@types/d3-time-format": "^4.0.3",
+    "@types/json-bigint": "^1.0.4",
+    "@types/lodash-es": "^4.17.12",
+    "typescript": "^7.0.2"
   }
 }

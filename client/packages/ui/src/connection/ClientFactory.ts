@@ -14,6 +14,7 @@ import type {
 import {
   CSRF_ERROR_TYPE,
   DEFAULT_APP_ROOT,
+  DEFAULT_GUEST_TOKEN_HEADER_NAME,
   DEFAULT_FETCH_RETRY_OPTIONS,
   HTTP_STATUS_BAD_REQUEST,
   HTTP_STATUS_UNAUTHORIZED,
@@ -57,11 +58,11 @@ export function createClient(config: ClientConfig = {}) {
     fetchRetryOptions = {},
     mode = "same-origin",
     timeout,
-    credentials = undefined,
-    csrfToken: initialCsrfToken = undefined,
-    guestToken = undefined,
-    guestTokenHeaderName = "X-GuestToken",
-    unauthorizedHandler = undefined,
+    credentials,
+    csrfToken: initialCsrfToken,
+    guestToken,
+    guestTokenHeaderName = DEFAULT_GUEST_TOKEN_HEADER_NAME,
+    unauthorizedHandler,
   } = config;
 
   const url = new URL(`${protocol}//${host}`);
@@ -87,9 +88,7 @@ export function createClient(config: ClientConfig = {}) {
   };
 
   const handleUnauthorized =
-    unauthorizedHandler !== undefined
-      ? unauthorizedHandler
-      : defaultUnauthorizedHandlerForPrefix(cleanedAppRoot);
+    unauthorizedHandler ?? defaultUnauthorizedHandlerForPrefix(cleanedAppRoot);
 
   const getUrl = ({
     host: inputHost,
@@ -249,15 +248,13 @@ export function createClient(config: ClientConfig = {}) {
   const postBlob = async (
     endpoint: string,
     payload: Record<string, any>,
-  ): Promise<Response> => {
-    await ensureAuth();
-    return post({
+  ): Promise<Response> =>
+    post({
       endpoint,
       postPayload: payload,
       parseMethod: "raw",
       stringify: false,
     });
-  };
 
   const postForm = async (
     endpointOrConfig: string | { endpoint?: string; url?: string },

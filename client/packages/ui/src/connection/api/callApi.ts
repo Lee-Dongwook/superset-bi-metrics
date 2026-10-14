@@ -12,7 +12,7 @@ function tryParsePayload(payload: Payload) {
     return typeof payload === "string"
       ? (JSON.parse(payload) as JsonValue)
       : payload;
-  } catch (error) {
+  } catch {
     throw new Error(`Invalid payload: ${payload}`);
   }
 }

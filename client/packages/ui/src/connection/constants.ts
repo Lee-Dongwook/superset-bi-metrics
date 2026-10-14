@@ -1,4 +1,4 @@
-import { FetchRetryOptions } from "./types";
+import type { FetchRetryOptions } from "./types";
 
 export const DEFAULT_APP_ROOT = "";
 export const HTTP_STATUS_OK = 200;
@@ -6,9 +6,11 @@ export const HTTP_STATUS_NOT_MODIFIED = 304;
 export const HTTP_STATUS_BAD_REQUEST = 400;
 export const HTTP_STATUS_UNAUTHORIZED = 401;
 export const CSRF_ERROR_TYPE = "CSRF_ERROR";
+export const DEFAULT_GUEST_TOKEN_HEADER_NAME = "X-GuestToken";
 
-export const CACHE_AVAILABLE = "caches" in window;
-export const CACHE_KEY = "TEST_CACHE_KEY";
+export const CACHE_AVAILABLE =
+  typeof window !== "undefined" && "caches" in window;
+export const CACHE_KEY = "@bi-metrics/ui/connection";
 
 export const DEFAULT_FETCH_RETRY_OPTIONS: FetchRetryOptions = {
   retries: 3,

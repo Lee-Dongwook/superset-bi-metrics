@@ -1,7 +1,7 @@
 import _JSONbig from "json-bigint";
 import { cloneDeepWith } from "lodash-es";
 
-import { ParseMethod, TextResponse, JsonResponse } from "../types";
+import type { ParseMethod, TextResponse, JsonResponse } from "../types";
 
 const JSONbig = _JSONbig({
   constructorAction: "preserve",

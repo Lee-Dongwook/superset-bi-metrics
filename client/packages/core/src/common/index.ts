@@ -43,7 +43,7 @@ export enum GenericDataType {
 
 export declare class Disposable {
   static from(
-    ...dispoasableLikes: {
+    ...disposableLikes: {
       dispose: () => any;
     }[]
   ): Disposable;

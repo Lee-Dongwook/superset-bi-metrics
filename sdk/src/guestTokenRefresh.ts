@@ -9,10 +9,10 @@ export function getGuestTokenRefreshTiming(currentGuestToken: string) {
   try {
     const parsed = jwtDecode<Record<string, any>>(currentGuestToken);
     const exp = new Date(
-      /[^0-9\.]/g.test(parsed.exp) ? parsed.exp : parseFloat(parsed.exp) * 1000,
+      /[^0-9.]/g.test(parsed.exp) ? parsed.exp : parseFloat(parsed.exp) * 1000,
     );
-    const isValidate = exp.toString() !== "Invalid Date";
-    const ttl = isValidate
+    const isValidDate = exp.toString() !== "Invalid Date";
+    const ttl = isValidDate
       ? Math.max(MIN_REFRESH_WAIT_MS, exp.getTime() - Date.now())
       : DEFAULT_TOKEN_EXP_MS;
     return ttl - REFRESH_TIMING_BUFFER_MS;

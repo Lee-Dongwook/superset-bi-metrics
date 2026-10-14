@@ -1,4 +1,5 @@
 import { createClient, type ClientInstance } from "./ClientFactory";
+import { DEFAULT_GUEST_TOKEN_HEADER_NAME } from "./constants";
 import type { ClientInterface } from "./types";
 
 let singletonClient: ClientInstance | undefined;
@@ -35,7 +36,7 @@ const Client: ClientInterface = {
     try {
       return getInstance().guestTokenHeaderName;
     } catch {
-      return "X-GuestToken";
+      return DEFAULT_GUEST_TOKEN_HEADER_NAME;
     }
   },
 };

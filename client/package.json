@@ -1,21 +1,22 @@
 {
   "name": "client",
   "version": "0.1.0",
+  "private": true,
   "type": "module",
-  "workspaces": [
-    "packages/*"
-  ],
+  "scripts": {
+    "build:packages": "pnpm --filter \"./packages/**\" build",
+    "build": "pnpm build:packages && webpack --mode production",
+    "dev": "pnpm build:packages && webpack serve --mode development",
+    "typecheck": "pnpm build:packages && tsc --noEmit",
+    "test": "jest"
+  },
   "dependencies": {
-    "@bi-metrics/core": "link:packages/core",
-    "@braintree/sanitize-url": "^7.1.2",
+    "@bi-metrics/core": "workspace:*",
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/modifiers": "^9.0.0",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
     "@googleapis/sheets": "^18.1.1",
-    "@playwright/test": "^1.64.0",
-    "@types/d3-selection": "^3.0.12",
-    "@types/d3-time-format": "^4.0.3",
     "@visx/axis": "^4.0.0",
     "dayjs": "^1.11.23",
     "echarts": "^6.1.0",
@@ -24,17 +25,36 @@
     "react-redux": "^9.3.0",
     "redux": "^5.0.1",
     "redux-thunk": "^3.1.0",
-    "use-event-callback": "^0.1.0",
-    "webpack": "^5.111.1"
+    "use-event-callback": "^0.1.0"
   },
   "devDependencies": {
+    "@babel/core": "^8.0.7",
+    "@babel/preset-env": "^8.0.7",
+    "@babel/preset-react": "^8.0.1",
+    "@babel/preset-typescript": "^8.0.7",
+    "@playwright/test": "^1.64.0",
     "@types/jest": "^30.0.0",
     "@types/node": "^26.6.5",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
+    "babel-jest": "^30.5.2",
+    "babel-loader": "^10.1.1",
+    "html-webpack-plugin": "^5.6.8",
     "jest": "^30.5.2",
-    "simple-zstd": "^2.1.0",
     "typescript": "^7.0.2",
-    "yargs": "^18.2.0"
+    "webpack": "^5.111.1",
+    "webpack-cli": "^7.2.3",
+    "webpack-dev-server": "^5.2.6"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/lib/",
+      "/e2e/"
+    ],
+    "moduleNameMapper": {
+      "^lodash-es$": "lodash"
+    }
   }
 }

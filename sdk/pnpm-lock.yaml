@@ -33,9 +33,6 @@ importers:
       jsdom:
         specifier: ^30.1.2
         version: 30.1.2
-      tscw-config:
-        specifier: ^1.1.2
-        version: 1.1.2(typescript@7.0.2)
       typescript:
         specifier: ^7.0.2
         version: 7.0.2
@@ -1560,10 +1557,6 @@ packages:
   std-env@4.3.0:
     resolution: {integrity: sha512-OtU/EgQ1kIm5KwqQpBC6ZEMXrZRui11w8zgfTWp8cdO9B8OaPsbA8bTHO2P+HNo1VlUTGMVBwPhydu6poeXiag==}
 
-  strip-json-comments@5.0.3:
-    resolution: {integrity: sha512-1tB5mhVo7U+ETBKNf92xT4hrQa3pm0MZ0PQvuDnWgAAGHDsfp4lPSpiS6psrSiet87wyGPh9ft6wmhOMQ0hDiw==}
-    engines: {node: '>=14.16'}
-
   supports-color@8.1.1:
     resolution: {integrity: sha512-MpUEN2OodtUzxvKQl72cUF7RQ5EiHsGvSsVG0ia9c5RbWGL2CI4C7EpPS8UTBIplnlzZiNuV56w+FuNxy3ty2Q==}
     engines: {node: '>=10'}
@@ -1607,12 +1600,6 @@ packages:
   tr46@7.0.0:
     resolution: {integrity: sha512-BcDSDW+SIGWVOns1Zm6Yg91q9AEj7eaID0QDY9oIqJD1A8dscNwMcl9Sms2DeuWCNov1X0/oXanHGYQBSLwZsg==}
     engines: {node: ^22.14.0 || >=24.0.0}
-
-  tscw-config@1.1.2:
-    resolution: {integrity: sha512-mrrMxCqC6kjqjuhGc7mTOB3P7JuBebZ0ZnFQTi4e+K0K+2kT1OvTXzFygWCPBor/F8WJ1IWVRrnBLKctFhFwOQ==}
-    hasBin: true
-    peerDependencies:
-      typescript: '>=2.0.0'
 
   typescript@7.0.2:
     resolution: {integrity: sha512-8FYau96o3NKOhbjKi/qNvG/W5jhzxkbdm5sj9AbZ/5T5sWqn3hJgLfGx27sRKZWTvyzCP8dLRBTf5tBTSRVUNA==}
@@ -3192,8 +3179,6 @@ snapshots:
 
   std-env@4.3.0: {}
 
-  strip-json-comments@5.0.3: {}
-
   supports-color@8.1.1:
     dependencies:
       has-flag: 4.0.0
@@ -3231,11 +3216,6 @@ snapshots:
   tr46@7.0.0:
     dependencies:
       punycode: 2.3.1
-
-  tscw-config@1.1.2(typescript@7.0.2):
-    dependencies:
-      strip-json-comments: 5.0.3
-      typescript: 7.0.2
 
   typescript@7.0.2:
     optionalDependencies:

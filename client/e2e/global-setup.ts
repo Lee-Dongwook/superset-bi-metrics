@@ -1,40 +1,15 @@
-import {
-  chromium,
-  type FullConfig,
-  type Browser,
-  type BrowserContext,
-} from "@playwright/test";
-import { mkdir } from "fs/promises";
-import { dirname } from "path";
+import { chromium, type FullConfig } from "@playwright/test";
 
 async function globalSetup(config: FullConfig) {
-  const baseUrl = config.projects[0]?.use?.baseURL || "http://localhost:5173";
+  const baseURL = config.projects[0]?.use?.baseURL ?? "http://localhost:5173";
 
-  let browser: Browser | null = null;
-  let context: BrowserContext | null = null;
-
+  const browser = await chromium.launch();
   try {
-    browser = await chromium.launch();
-  } catch (error) {
-    if (error instanceof Error) {
-      throw new Error(error.message);
-    }
-    throw new Error("Browser launch failed");
-  }
-
-  try {
-    context = await browser.newContext({ baseURL: baseUrl });
-    const page = await context.newPage();
-    //TODO
-  } catch (error) {
-    if (error instanceof Error) {
-      throw error.message;
-    }
-
-    throw error;
+    const context = await browser.newContext({ baseURL });
+    await context.newPage();
+    // TODO: log in and persist storage state for e2e specs.
   } finally {
-    if (context) await context.close();
-    if (browser) await browser.close();
+    await browser.close();
   }
 }
 
