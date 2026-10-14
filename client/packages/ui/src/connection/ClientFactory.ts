@@ -1,15 +1,12 @@
 import { sanitizeUrl } from "@braintree/sanitize-url";
-import callApiAndParseWithTimeout from "./callApi/callApiAndParseWithTimeout";
+import callApiAndParseWithTimeout from "./api/callApiAndParseWithTimeout";
 import type {
   ClientConfig,
-  ClientTimeout,
-  Credentials,
   CsrfPromise,
   CsrfToken,
   FetchRetryOptions,
   Headers,
   Host,
-  Mode,
   Protocol,
   RequestConfig,
   ParseMethod,
@@ -326,8 +323,10 @@ export function createClient(config: ClientConfig = {}) {
     refreshCSRFToken,
     ensureAuth,
     fetchCSRFToken,
-    getCSRFToken: () => csrfToken || fetchCSRFToken(),
+    getCSRFToken: (): CsrfPromise =>
+      csrfToken ? Promise.resolve(csrfToken) : fetchCSRFToken(),
     getUrl,
+    guestTokenHeaderName,
   };
 }
 
