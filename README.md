@@ -93,6 +93,34 @@ make run        # 로컬 서버 실행 (:8080)
 make test       # 단위 테스트 실행
 ```
 
+환경 변수는 `.env`를 자동으로 읽지 않으므로 `set -a; . ./.env; set +a; make run`처럼 export 후 실행합니다.
+
+### 3. Core 백엔드 (Python, 기본 DB는 `~/.superset/` 아래 SQLite)
+
+```bash
+export FLASK_APP="core.app:create_app()" SUPERSET_SECRET_KEY=<임의의 긴 문자열>
+.venv/bin/flask fab create-admin          # 최초 1회
+.venv/bin/flask fab create-permissions    # 최초 1회 (권한 동기화)
+.venv/bin/flask run --port 8088           # http://localhost:8088/health → OK
+.venv/bin/python -m pytest -q             # 테스트
+```
+
+### 4. 클라이언트 (pnpm)
+
+```bash
+cd client
+pnpm install
+pnpm dev        # http://localhost:5173, /api 는 BACKEND_URL(기본 :8088)로 프록시
+pnpm build      # dist/ 생성
+pnpm test
+```
+
+### 5. Semantic Rust 코어
+
+```bash
+cd semantic/rust/core && cargo test
+```
+
 ---
 
 ## 📝 개발 진행 현황 및 로드맵
