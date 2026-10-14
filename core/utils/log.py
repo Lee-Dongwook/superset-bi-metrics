@@ -1,22 +1,12 @@
 from __future__ import annotations
 
 import functools
-import inspect
 import logging
-import textwrap
-import uuid
-from abc import ABC, abstractmethod
-from collections.abc import Iterator
-from contextlib import contextmanager
-from datetime import datetime, timedelta
-from typing import Any, Callable, cast, Literal
-
 import time
+from abc import ABC, abstractmethod
+from typing import Any, Callable
 
-from flask import current_app, g, has_app_context, has_request_context, request
-from flask_appbuilder.const import API_URI_RIS_KEY
-from sqlalchemy import inspect as sa_inspect
-from sqlalchemy.exc import SQLAlchemyError
+from flask import current_app, has_app_context, has_request_context, request
 
 from core.utils.core import get_user_id
 
@@ -115,7 +105,5 @@ class DBEventLogger(AbstractEventLogger):
         *args: Any,
         **kwargs: Any,
     ) -> None:
-        records = kwargs.get("records", [])
-        curated_payload = kwargs.get("curated_payload")
-
-        #TODO
+        # TODO: persist the event once a Log model is ported; no-op until then.
+        pass

@@ -1,28 +1,16 @@
-import json
-import logging
 import os
-from typing import Any, Callable, Optional
+from typing import Any
 
 import celery
-from flask import Flask
 from flask_appbuilder import AppBuilder
-
-try:
-    from flask_appbuilder.utils.legacy import get_sqla_class
-except ImportError:
-    from flask_sqlalchemy import SQLAlchemy
-
-    def get_sqla_class() -> Any:
-        return SQLAlchemy
-
+from flask_appbuilder.utils.legacy import get_sqla_class
 from flask_caching import Cache
-from flask_caching.backends.base import BaseCache
-from flask_migrate import Migrate
 from flask_talisman import Talisman
 from flask_wtf.csrf import CSRFProtect
 from werkzeug.local import LocalProxy
 
-class ResultsBackendManger:
+
+class ResultsBackendManager:
     def __init__(self) -> None:
         self._results_backend = None
         self._use_msgpack = False

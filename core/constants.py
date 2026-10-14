@@ -1,4 +1,3 @@
-from enum import Enum
 
 from core.utils.backports import StrEnum
 

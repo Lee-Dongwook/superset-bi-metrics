@@ -79,10 +79,9 @@ class PrefixRedirectMiddleware:
         
         canonical_after_strip = candidate[len(_PREFIX) :] or "/"
 
-        if sql_match := _SQL_RE.match(canonical_after_strip):
-            if method_for_match != "GET":
-                return _response_with_location(410, None)(environ, start_response)
-            #TODO
+        if _SQL_RE.match(canonical_after_strip) and method_for_match != "GET":
+            return _response_with_location(410, None)(environ, start_response)
+        # TODO: redirect legacy GET /superset/sql/<id> to its new location
 
         return self.wsgi_app(environ, start_response)
 

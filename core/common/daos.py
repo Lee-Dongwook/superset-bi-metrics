@@ -4,7 +4,7 @@ from typing import Any, ClassVar, Generic, TypeVar
 from flask_appbuilder.models.filters import BaseFilter
 from sqlalchemy.orm import Query as SQLAQuery
 
-from core.common.models import (CoreModel, Database)
+from core.common.models import (CoreModel)
 
 T = TypeVar("T", bound=CoreModel)
 

@@ -7,6 +7,19 @@ from pandas import DataFrame
 from sqlalchemy import text
 from sqlalchemy.inspection import inspect
 
+from tests.common.logger_utils import log
+
+if TYPE_CHECKING:
+    from sqlalchemy.engine import Engine
+
+
+class DataLoader(ABC):
+    @abstractmethod
+    def load_table(self, table: Table) -> None: ...
+
+    @abstractmethod
+    def remove_table(self, table_name: str) -> None: ...
+
 
 @log
 class PandasDataLoader(DataLoader):
@@ -49,7 +62,7 @@ class PandasDataLoader(DataLoader):
     
     def remove_table(self, table_name: str) -> None:
         with self._db_engine.begin() as conn:
-            conn.exectue(text(f"DROP TABLE IF EXISTS {table_name}"))
+            conn.execute(text(f"DROP TABLE IF EXISTS {table_name}"))
 
 class TableToDfConvertor(ABC):
     @abstractmethod

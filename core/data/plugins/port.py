@@ -1,5 +1,4 @@
 import itertools
-import string
 from typing import Any
 
 from sqlalchemy import Column
@@ -23,8 +22,8 @@ port_conversion_dict: dict[str, list[int]] = {
     "submissions": [465],
     "kerberos": [88],
     "kerberos-adm": [749],
-    "poperator3": [110],
-    "poperator3s": [995],
+    "pop3": [110],
+    "pop3s": [995],
     "nntp": [119],
     "nntps": [563],
     "ntp": [123],
@@ -42,7 +41,17 @@ port_conversion_dict: dict[str, list[int]] = {
 
 def port_translation_func(req: AdvancedDataTypeRequest) -> AdvancedDataTypeResponse:
     resp: AdvancedDataTypeResponse = {
-
+        "values": [],
+        "error_message": "",
+        "display_value": "",
+        "valid_filter_operators": [
+            FilterStringOperators.EQUALS,
+            FilterStringOperators.GREATER_THAN_OR_EQUAL,
+            FilterStringOperators.GREATER_THAN,
+            FilterStringOperators.IN,
+            FilterStringOperators.LESS_THAN,
+            FilterStringOperators.LESS_THAN_OR_EQUAL,
+        ],
     }
 
     if req["values"] == [""]:

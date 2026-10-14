@@ -1,5 +1,4 @@
 import logging
-from sys import prefix
 from typing import Any, Optional
 
 from colorama import Fore, Style
@@ -16,16 +15,16 @@ class BaseStatsLogger:
         return key
     
     def incr(self, key: str) -> None:
-        return NotImplemented()
+        raise NotImplementedError()
     
     def decr(self, key: str) -> None:
-        return NotImplemented()
+        raise NotImplementedError()
     
     def timing(self, key: str, value: float) -> None:
-        return NotImplemented()
+        raise NotImplementedError()
     
     def gauge(self, key: str, value: float) -> None:
-        return NotImplemented()
+        raise NotImplementedError()
 
 class DummyStatsLogger(BaseStatsLogger):
     def incr(self, key: str) -> None:
@@ -59,10 +58,7 @@ try:
             prefix: str = "superset",
             statsd_client: Optional[StatsClient] = None,
         ) -> None:
-             if statsd_client:
-                self.client = statsd_client
-             else:
-                self.client = StatsClient(host=host, port=port, prefix=prefix)
+            self.client = statsd_client or StatsClient(host=host, port=port, prefix=prefix)
 
         def incr(self, key: str) -> None:
             self.client.incr(key)

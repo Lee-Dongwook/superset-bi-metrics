@@ -1,12 +1,9 @@
 from __future__ import annotations
 
-from collections import defaultdict
 from typing import Any, Optional
 
 from flask_babel import gettext as _
-from marshmallow import ValidationError
 
-from core.semantic.errors import SemanticResultCompletenessReason
 
 from core.errors import ErrorLevel, CoreError, CommonErrorType
 

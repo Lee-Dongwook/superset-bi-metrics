@@ -9,7 +9,7 @@ dependencies = [
     "pyarrow>=26.0.0",
     "pydantic>=2.14.0",
     "sqlalchemy>=2.1.4",
-    "sqlalchemy-utils>=0.42.1",
+    "sqlalchemy-utils>=0.43.0",
     "sqlglot>=30.21.0",
     "typing-extensions>=4.16.0",
 ]

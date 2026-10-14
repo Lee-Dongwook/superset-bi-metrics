@@ -4,6 +4,8 @@ from typing import Any, ClassVar, Generic, TypeVar
 from flask_appbuilder.models.filters import BaseFilter
 from sqlalchemy.orm import Query as SQLAQuery
 
+from ..models import CoreModel
+
 T = TypeVar("T", bound=CoreModel)
 
 class BaseDAO(Generic[T], ABC):

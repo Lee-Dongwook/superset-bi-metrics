@@ -1,4 +1,3 @@
-from re import M
 from core.errors import CommonErrorType, ErrorLevel
 
 error_payload_content = {

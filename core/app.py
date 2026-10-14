@@ -8,14 +8,15 @@ from wsgiref.types import StartResponse, WSGIApplication, WSGIEnvironment
 from alembic.config import Config
 from alembic.runtime.migration import MigrationContext
 from alembic.script import ScriptDirectory
-from core.extension.local_extensions_watcher import start_local_extensions_watcher_thread
-from core.initialization import AppInitializer
-from core.middleware import ExtensionCacheMiddleware, PrefixRedirectMiddleware
 from flask import Flask, Response
 from werkzeug.exceptions import NotFound
 
+from core.extension.local_extensions_watcher import start_local_extensions_watcher_thread
+from core.initialization import AppInitializer
 from core.marshmallow_compatibility import patch_marshmallow_for_flask_appbuilder
+from core.middleware import ExtensionCacheMiddleware, PrefixRedirectMiddleware
 
+# Must run before any FAB schema is built; the initializer imports the APIs lazily.
 patch_marshmallow_for_flask_appbuilder()
 
 logger = logging.getLogger(__name__)
@@ -39,7 +40,7 @@ class CoreApp(Flask):
                 current_rev = context.get_current_revision()
 
             alembic_config = Config()
-            alembic_config.set_main_option("script_location","superset-bi-metrics:migrations")
+            alembic_config.set_main_option("script_location", "core:migrations")
             scripts = ScriptDirectory.from_config(alembic_config)
             head_rev = scripts.get_current_head()
 
@@ -49,19 +50,19 @@ class CoreApp(Flask):
             return is_current
 
         except Exception as e:
-            logger.debug("Couldn't check migration status: %s",e)
+            logger.debug("Couldn't check migration status: %s", e)
             return False
 
     def sync_config_to_db(self) -> None:
         try:
             if not self._is_db_up_to_date():
-                logger.info("Please Migration by db upgrade")
+                logger.info("Database is not up to date; run the migrations first")
                 return
 
             logger.info("Syncing configuration to db...")
             # TODO
         except Exception as e:
-            logger.error("Failed to sync db: %s",e)
+            logger.error("Failed to sync db: %s", e)
 
 class AppRootMiddleware:
     def __init__(
@@ -102,7 +103,7 @@ def create_app(
             or app.config["APPLICATION_ROOT"],
         )
 
-        app_root = app_root.rstrip("/") or  "/"
+        app_root = app_root.rstrip("/") or "/"
 
         if app_root != "/":
             if not app.config.get("STATIC_ASSETS_PREFIX"):

@@ -1,40 +1,22 @@
+"""Default configuration.
+
+Override by pointing ``SUPERSET_CONFIG`` at your own module, e.g. one that does
+``from core.config import *`` and sets ``SQLALCHEMY_DATABASE_URI`` to the
+Postgres from docker/docker-compose.yaml.
+"""
+
 from __future__ import annotations
 
-import hashlib
-import importlib.util
-import json
-import logging
 import os
-import re
-import sys
-from collections import OrderedDict
-from contextlib import contextmanager
-from datetime import timedelta
-from email.mime.multipart import MIMEMultipart
 from importlib.resources import files
-from typing import Any, Callable, Iterator, Literal, Optional, TYPE_CHECKING, TypedDict
 
-import click
-from celery.schedules import crontab
-from flask import Blueprint
 from flask_appbuilder.security.manager import AUTH_DB
-from flask_caching.backends.base import BaseCache
-from pandas import Series
-from pandas._libs.parsers import STR_NA_VALUES
-from sqlalchemy.engine.url import URL
-from sqlalchemy.orm import Session
-from sqlalchemy.orm.query import Query
 
+from core.constants import CHANGE_ME_SECRET_KEY
+from core.data.plugins.address import address
+from core.data.plugins.port import port
 from core.stats_logger import DummyStatsLogger
 from core.utils.log import DBEventLogger
-
-logger = logging.getLogger(__name__)
-
-if TYPE_CHECKING:
-    from flask_appbuilder.security.sqla import models
-    from sqlglot import Dialect, Dialects
-
-    DialectExtensions = dict[str, Dialects | type[Dialect]]
 
 STATS_LOGGER = DummyStatsLogger()
 EVENT_LOGGER = DBEventLogger()
@@ -42,7 +24,31 @@ SUPERSET_LOG_VIEW = True
 SUPERSET_SECURITY_VIEW_MENU = True
 
 BASE_DIR = str(files("core"))
-if "SUPERSET_HOME" in os.environ:
-    DATA_DIR = os.environ["SUPERSET_HOME"]
-else:
-    DATA_DIR = os.path.expanduser("~/.superset")
+DATA_DIR = os.environ.get("SUPERSET_HOME") or os.path.expanduser("~/.superset")
+
+APP_NAME = "Superset BI Metrics"
+SECRET_KEY = os.environ.get("SUPERSET_SECRET_KEY") or CHANGE_ME_SECRET_KEY
+
+# SQLite keeps local dev dependency-free.
+SQLALCHEMY_DATABASE_URI = (
+    "sqlite:///"
+    + os.path.join(DATA_DIR, "superset_bi_metrics.db")
+    + "?check_same_thread=false"
+)
+
+AUTH_TYPE = AUTH_DB
+FAB_ADD_SECURITY_API = True
+
+WTF_CSRF_ENABLED = True
+WTF_CSRF_EXEMPT_LIST: list[str] = []
+WTF_CSRF_TIME_LIMIT = None
+
+# Per-process cache; use RedisCache (docker-compose redis) to share across workers.
+DATA_CACHE_CONFIG = {"CACHE_TYPE": "SimpleCache"}
+
+SUPERSET_WEBSERVER_DOMAINS: list[str] | None = None
+
+ADVANCED_DATA_TYPES = {
+    "internet_address": address,
+    "port": port,
+}

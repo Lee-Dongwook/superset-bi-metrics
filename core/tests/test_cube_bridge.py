@@ -3,7 +3,6 @@ from __future__ import annotations
 import json
 from unittest.mock import MagicMock
 
-import pytest
 
 from core.query.types import QueryStatus
 from core.semantic.bridge import CubeAsyncQueryHandle, CubeQueryBridge

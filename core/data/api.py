@@ -11,15 +11,18 @@ from flask_appbuilder.api import (
 )
 from flask_babel import lazy_gettext as _
 
+from core.api.base import BaseSuperSetBiMetricsAPI
 from core.data.schemas import (
     advanced_data_type_convert_schema,
     AdvancedDataTypeSchema,
 )
-
 from core.data.types import AdvancedDataTypeResponse
 from core.extension import event_logger
 
-class AdvancedDataTypeApi():
+
+class AdvancedDataTypeApi(BaseSuperSetBiMetricsAPI):
+    """Converts raw values of an advanced data type: GET /api/v1/advanced_data_type/."""
+
     allow_browser_login = True
     resource_name = "advanced_data_type"
     class_permission_name = "AdvancedDataType"
@@ -29,13 +32,14 @@ class AdvancedDataTypeApi():
         "advanced_data_type_convert_schema": advanced_data_type_convert_schema,
     }
     openapi_spec_component_schemas = (AdvancedDataTypeSchema,)
+
     @protect()
     @safe
     @expose("/convert", methods=("GET",))
     @permission_name("read")
     @event_logger.log_this_with_context(
         action=lambda self, *args, **kwargs: f"{self.__class__.__name__}.get",
-        log_to_statsd=False,  
+        log_to_statsd=False,
     )
     @parse_rison(advanced_data_type_convert_schema)
     def get(self, **kwargs: Any) -> Response:
@@ -46,7 +50,7 @@ class AdvancedDataTypeApi():
         if not addon:
             return self.response(
                 400,
-                message= _(
+                message=_(
                     "Invalid advanced data type: %(advanced_data_type)s",
                     advanced_data_type=advanced_data_type,
                 ),
@@ -64,8 +68,8 @@ class AdvancedDataTypeApi():
     @expose("/types", methods=("GET",))
     @permission_name("read")
     @event_logger.log_this_with_context(
-        action=lambda self, *args, **kwargs: f"{self.__class__.__name__}.get",
-        log_to_statsd=False, 
+        action=lambda self, *args, **kwargs: f"{self.__class__.__name__}.get_types",
+        log_to_statsd=False,
     )
     def get_types(self) -> Response:
         return self.response(200, result=list(app.config["ADVANCED_DATA_TYPES"].keys()))
