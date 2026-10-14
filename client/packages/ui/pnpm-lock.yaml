@@ -32,6 +32,9 @@ importers:
       lodash-es:
         specifier: ^4.18.1
         version: 4.18.1
+      math-expression-evaluator:
+        specifier: ^2.0.7
+        version: 2.0.7
       react:
         specifier: ^19.3.0
         version: 19.3.0
@@ -218,6 +221,9 @@ packages:
 
   lowlight@1.20.0:
     resolution: {integrity: sha512-8Ktj+prEb1RoCPkEOrPMYUN/nCggB7qAWe3a7OpMjWQkh3l2RD5wKRQ+o8Q8YuI9RG/xs95waaI/E6ym/7NsTw==}
+
+  math-expression-evaluator@2.0.7:
+    resolution: {integrity: sha512-uwliJZ6BPHRq4eiqNWxZBDzKUiS5RIynFFcgchqhBOloVLVBpZpNG8jRYkedLcBvhph8TnRyWEuxPqiQcwIdog==}
 
   mdast-util-from-markdown@2.1.0:
     resolution: {integrity: sha512-KRLgmPaP2H1ul2bpoJkOS+9pAcDAAj9Nu1mqLnh8NLeJG5tlvj42TH80PIGBpROWlRXLk0lDrWNuZCFy/tsB4A==}
@@ -567,6 +573,8 @@ snapshots:
     dependencies:
       fault: 1.0.4
       highlight.js: 10.7.3
+
+  math-expression-evaluator@2.0.7: {}
 
   mdast-util-from-markdown@2.1.0:
     dependencies:
