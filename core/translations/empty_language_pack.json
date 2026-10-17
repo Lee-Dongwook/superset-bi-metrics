@@ -1,0 +1,12 @@
+{
+  "domain": "bimetrics",
+  "locale_data": {
+    "bimetrics": {
+      "": {
+        "domain": "bimetrics",
+        "plural_forms": "nplurals=2; plural=(n != 1)",
+        "lang": "en"
+      }
+    }
+  }
+}
