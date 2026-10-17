@@ -7,6 +7,7 @@ from unittest.mock import MagicMock
 from core.query.types import QueryStatus
 from core.semantic.bridge import CubeAsyncQueryHandle, CubeQueryBridge
 from core.semantic.cube_client import CubeClient
+from core.semantic.mock_cube_client import MockCubeClient
 from core.semantic.redis_publisher import RedisEventPublisher
 from core.semantic.types import CubeQueryEvent, CubeQueryStage
 
@@ -205,3 +206,32 @@ def test_parse_stage_waiting_for_query() -> None:
         {"stage": {"stage": "Waiting for query"}}
     )
     assert stage.step == "WAITING"
+
+
+def test_mock_cube_client_through_bridge() -> None:
+    mock_publisher = MagicMock(spec=RedisEventPublisher)
+    bridge = CubeQueryBridge(cube_client=MockCubeClient(), publisher=mock_publisher)
+    query = {
+        "measures": ["Orders.count", "Orders.totalAmount"],
+        "dimensions": ["Orders.status"],
+        "timeDimensions": [
+            {"dimension": "Orders.createdAt", "granularity": "month", "dateRange": ["2026-01-01", "2026-03-31"]}
+        ],
+    }
+
+    result = bridge.execute_query(channel_id="chan-mock", query_id="1", query=query, poll_interval=0)
+
+    assert result.status == QueryStatus.SUCCESS
+    df = result.statements[0].data
+    assert len(df) == 3 * 3  # 3 months x 3 statuses
+    assert set(df.columns) == {"Orders.createdAt.month", "Orders.status", "Orders.count", "Orders.totalAmount"}
+    steps = [c.kwargs["step"] for c in mock_publisher.publish_stage.call_args_list]
+    assert steps == ["DISPATCHED", "WAITING", "BUILDING_PRE_AGGREGATIONS", "EXECUTING_QUERY"]
+
+    # Same query is deterministic and replays stages again
+    again = bridge.execute_query(channel_id="chan-mock", query_id="2", query=query, poll_interval=0)
+    assert again.statements[0].data.equals(df)
+
+    bad = bridge.execute_query(channel_id="chan-mock", query_id="3", query={"measures": ["Users.count"]}, poll_interval=0)
+    assert bad.status == QueryStatus.FAILED
+    assert "Users.count" in str(bad.error_message)
