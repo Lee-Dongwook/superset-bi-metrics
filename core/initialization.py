@@ -82,8 +82,9 @@ class AppInitializer:
         from core.css.api import CssTemplateApi
         from core.data.api import AdvancedDataTypeApi
         from core.domains.api import DomainRestApi
+        from core.metrics.api import MetricsRestApi
 
-        for api in (AdvancedDataTypeApi, CacheApi, CssTemplateApi, DomainRestApi):
+        for api in (AdvancedDataTypeApi, CacheApi, CssTemplateApi, DomainRestApi, MetricsRestApi):
             appbuilder.add_api(api)
 
         for rule in ("/health", "/healthcheck", "/ping"):

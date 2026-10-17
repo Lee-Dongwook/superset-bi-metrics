@@ -48,6 +48,9 @@ DATA_CACHE_CONFIG = {"CACHE_TYPE": "SimpleCache"}
 
 SUPERSET_WEBSERVER_DOMAINS: list[str] | None = None
 
+# Serve /api/v1/metrics from core/semantic/mock_cube_client.py until a real Cube server is wired.
+CUBE_MOCK = True
+
 ADVANCED_DATA_TYPES = {
     "internet_address": address,
     "port": port,

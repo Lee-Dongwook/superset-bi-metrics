@@ -155,7 +155,7 @@ class CubeQueryBridge:
             self.publisher.publish_success(
                 channel_id=channel_id,
                 query_id=qid_str,
-                result_url=f"/api/v1/query/{qid_str}/result",
+                result_url=f"/api/v1/metrics/query/{qid_str}/result",
                 stage=CubeQueryStage(
                     step="COMPLETED",
                     description="Query completed successfully",

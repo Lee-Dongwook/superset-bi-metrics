@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import time
+from unittest.mock import MagicMock
+
 import pytest
 from flask import Flask
 from flask_appbuilder import AppBuilder
@@ -8,6 +11,8 @@ from core.cache_keys.api import CacheApi
 from core.cache_keys.models import CacheKey
 from core.css.api import CssTemplateApi
 from core.domains.api import DomainRestApi
+from core.metrics.api import MetricsRestApi
+from core.semantic.redis_publisher import RedisEventPublisher
 from core.extension import data_cache, db
 from core.marshmallow_compatibility import patch_marshmallow_for_flask_appbuilder
 from core.utils.log import AbstractEventLogger
@@ -25,6 +30,7 @@ def client():
         STATS_LOGGER=None,
         CACHE_TYPE="SimpleCache",
         SUPERSET_WEBSERVER_DOMAINS=["a.example.com", "b.example.com"],
+        CUBE_MOCK=True,
     )
     with app.app_context():
         db.init_app(app)
@@ -33,6 +39,7 @@ def client():
         appbuilder.add_api(CssTemplateApi)
         appbuilder.add_api(CacheApi)
         appbuilder.add_api(DomainRestApi)
+        appbuilder.add_api(MetricsRestApi)
         db.create_all()
         role = appbuilder.sm.find_role("Admin")
         appbuilder.sm.add_user("admin", "a", "d", "admin@x.io", role, password="pw")
@@ -112,3 +119,34 @@ def test_domains(client) -> None:
     res = client.get("/api/v1/domains/")
     assert res.status_code == 200
     assert res.json["result"] == {"domains": ["a.example.com", "b.example.com"]}
+
+
+def test_metrics_query_lifecycle(client, monkeypatch) -> None:
+    publish = MagicMock(return_value=True)
+    monkeypatch.setattr(RedisEventPublisher, "publish", publish)
+
+    assert client.post("/api/v1/metrics/query", json={"query": {}}).status_code == 400
+
+    query = {
+        "measures": ["Orders.count"],
+        "timeDimensions": [
+            {"dimension": "Orders.createdAt", "granularity": "month", "dateRange": ["2026-01-01", "2026-02-28"]}
+        ],
+    }
+    res = client.post("/api/v1/metrics/query", json={"channel_id": "chan-1", "query": query})
+    assert res.status_code == 202
+    result_url = res.json["result_url"]
+
+    deadline = time.time() + 10
+    while (res := client.get(result_url)).status_code == 202 and time.time() < deadline:
+        time.sleep(0.1)
+    assert res.status_code == 200, res.json
+    assert res.json["status"] == "success"
+    assert [r["Orders.createdAt.month"][:7] for r in res.json["data"]] == ["2026-01", "2026-02"]
+
+    # Every progress event was routed to the caller's channel, ending with the result link.
+    events = [c.args[0] for c in publish.call_args_list]
+    assert {e.channel_id for e in events} == {"chan-1"}
+    assert events[-1].result_url == result_url
+
+    assert client.get("/api/v1/metrics/query/9999/result").status_code == 404
