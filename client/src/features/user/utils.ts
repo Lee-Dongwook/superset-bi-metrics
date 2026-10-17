@@ -1,7 +1,7 @@
 import { t } from "@bi-metrics/core/translation";
-import { getClientErrorObject, Client } from "";
-import { SelectOption } from "";
-import { Actions } from "";
+import { getClientErrorObject, Client } from "@bi-metrics/ui";
+import type { SelectOption } from "../../components/ListView/types";
+import { Actions } from "../../constants";
 import { FormValues } from "./types";
 
 type AddDangerToast = (message: string) => void;
@@ -17,7 +17,7 @@ type GetFieldValue = { getFieldValue: (field: string) => Array<SelectOption> };
 
 export const handleUserError = async (
   error: Response,
-  action: Actions.CREATE | Actions.DELETE,
+  action: Actions.CREATE | Actions.UPDATE,
   addDangerToast: AddDangerToast,
 ): Promise<never> => {
   let errorMsg =
