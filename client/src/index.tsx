@@ -1,3 +1,4 @@
+import "./index.css";
 import { createRoot } from "react-dom/client";
 
 const container = document.createElement("div");
