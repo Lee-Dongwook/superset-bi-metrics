@@ -108,6 +108,9 @@ importers:
 
   packages/core:
     dependencies:
+      jed:
+        specifier: ^1.1.1
+        version: 1.1.1
       lodash-es:
         specifier: ^4.18.1
         version: 4.18.1
@@ -2939,6 +2942,9 @@ packages:
 
   jackspeak@3.4.3:
     resolution: {integrity: sha512-OGlZQpz2yfahA/Rd1Y8Cd9SIEsqvXkLVoSw/cgwhnhFMDbsQFeZYoJJ7bIZBS9BcamUW96asq/npPWugM+RQBw==}
+
+  jed@1.1.1:
+    resolution: {integrity: sha512-z35ZSEcXHxLW4yumw0dF6L464NT36vmx3wxJw8MDpraBcWuNVgUPZgPJKcu1HekNgwlMFNqol7i/IpSbjhqwqA==}
 
   jest-changed-files@30.5.1:
     resolution: {integrity: sha512-0+bvMM/ENhDI29Z8q1r4HxiDIi4G5tnBmSw4esfPQoj9q8Nik7KIyuxHkTVnnniJQf05SxpGaKDQ+4h28ynGPg==}
@@ -7328,6 +7334,8 @@ snapshots:
       '@isaacs/cliui': 8.0.2
     optionalDependencies:
       '@pkgjs/parseargs': 0.11.0
+
+  jed@1.1.1: {}
 
   jest-changed-files@30.5.1:
     dependencies:
