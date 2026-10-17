@@ -17,34 +17,48 @@
  * under the License.
  */
 
-import { Client } from "@bi-metrics/core";
-import { logging } from "@bi-metrics/core/utils";
-// import getBootstrapData from "src/utils/getBootstrapData";
-// import { getTabId, subscribeTabIdChange } from "src/hooks/useTabId";
+import { logging } from '@bi-metrics/core/utils';
 
-export interface RealtimeMessage {
-  topic: string;
-  payload: unknown;
+// Mirrors core/semantic/types.py CubeQueryEvent, as relayed verbatim by the Go WebSocket server.
+export interface QueryEvent {
+  channel_id: string;
+  query_id: string;
+  status:
+    | 'PENDING'
+    | 'RUNNING'
+    | 'SUCCESS'
+    | 'FAILED'
+    | 'TIMED_OUT'
+    | 'STOPPED';
+  stage: {
+    step: string;
+    description: string;
+    progress_percent: number;
+    elapsed_ms: number;
+  } | null;
+  result_url: string | null;
+  error: string | null;
 }
 
-export type RealtimeHandler = (payload: unknown) => void;
+export type RealtimeHandler = (event: QueryEvent) => void;
 
 export type RealtimeConfig = {
-  WEBSOCKET_ENABLE?: boolean;
+  // Proxied to the Go server (:8080) by webpack.proxy-config.js in dev.
   WEBSOCKET_URL?: string;
-  WEBSOCKET_JWT_EXPIRATION_SECONDS?: number;
 };
 
-export type RealtimeOpenReason = "initial" | "reconnect" | "keepalive";
+export type RealtimeOpenReason = 'initial' | 'reconnect';
 export type RealtimeOpenListener = (reason: RealtimeOpenReason) => void;
 
 export type RealtimeConnectionState =
-  | "connecting"
-  | "open"
-  | "reconnecting"
-  | "unhealthy";
+  | 'connecting'
+  | 'open'
+  | 'reconnecting'
+  | 'unhealthy';
 
 export type RealtimeStateListener = (state: RealtimeConnectionState) => void;
+
+const DEFAULT_WEBSOCKET_URL = '/ws';
 
 export class RealtimeClient {
   private static readonly RECONNECT_BASE_MS = 1000;
@@ -52,31 +66,21 @@ export class RealtimeClient {
   private static readonly UNHEALTHY_AFTER_ATTEMPTS = 3;
   private static readonly WS_CONNECTING = 0;
   private static readonly WS_OPEN = 1;
-  private static readonly KEEPALIVE_FRACTION = 0.6;
-  private static readonly COOKIE_REFRESH_ENDPOINT = "/api/v1/me/";
+
+  // One channel per tab: core publishes a query's events to the channel_id sent with it.
+  public readonly channelId: string = crypto.randomUUID();
 
   private socket?: WebSocket;
-  private reconnectTimeoutId?: number;
-  private keepaliveTimeoutId?: number;
-  private tokenLifetimeMs = 0;
-  private enabled = false;
+  private reconnectTimeoutId?: ReturnType<typeof setTimeout>;
   private url?: string;
   private started = false;
   private generation = 0;
   private reconnectAttempts = 0;
 
-  private readonly handlersByTopic = new Map<string, Set<RealtimeHandler>>();
-  private readonly openListeners = new Set<RealtimeOpenListener>();
-  private readonly stateListeners = new Set<RealtimeStateListener>();
-
-  constructor() {
-    subscribeTabIdChange(() => {
-      if (!this.enabled || !this.hasActiveSocket()) return;
-      this.generation += 1;
-      this.teardownSocket();
-      this.openSocket(this.generation, "reconnect");
-    });
-  }
+  private readonly handlersByQuery: Map<string, Set<RealtimeHandler>> =
+    new Map();
+  private readonly openListeners: Set<RealtimeOpenListener> = new Set();
+  private readonly stateListeners: Set<RealtimeStateListener> = new Set();
 
   public subscribeState(listener: RealtimeStateListener): () => void {
     this.stateListeners.add(listener);
@@ -93,11 +97,11 @@ export class RealtimeClient {
   }
 
   private emitState(state: RealtimeConnectionState): void {
-    this.stateListeners.forEach((listener) => {
+    this.stateListeners.forEach(listener => {
       try {
         listener(state);
       } catch (err) {
-        logging.warn("Realtime state-listener error", err);
+        logging.warn('Realtime state-listener error', err);
       }
     });
   }
@@ -116,54 +120,46 @@ export class RealtimeClient {
     this.reconnectAttempts += 1;
     this.emitState(
       this.reconnectAttempts >= RealtimeClient.UNHEALTHY_AFTER_ATTEMPTS
-        ? "unhealthy"
-        : "reconnecting",
+        ? 'unhealthy'
+        : 'reconnecting',
     );
-    this.reconnectTimeoutId = window.setTimeout(
-      () => this.openSocket(thisGeneration, "reconnect"),
+    this.reconnectTimeoutId = setTimeout(
+      () => this.openSocket(thisGeneration, 'reconnect'),
       this.reconnectDelayMs(this.reconnectAttempts),
     );
   }
 
   public dispatchMessage(rawData: string): void {
-    let message: RealtimeMessage;
+    let event: QueryEvent;
     try {
-      const parsed: unknown = JSON.parse(rawData) ?? {};
-      if (!parsed || typeof parsed !== "object") return;
-      const { topic, payload } = parsed as {
-        topic?: unknown;
-        payload?: unknown;
-      };
-      if (typeof topic !== "string") return;
-      message = { topic, payload };
+      const parsed: unknown = JSON.parse(rawData);
+      // Control replies such as {"action":"pong"} carry no query_id.
+      if (!parsed || typeof parsed !== 'object') return;
+      if (typeof (parsed as { query_id?: unknown }).query_id !== 'string') {
+        return;
+      }
+      event = parsed as QueryEvent;
     } catch (err) {
-      logging.warn("Failed to parse realtime message", err);
+      logging.warn('Failed to parse realtime message', err);
       return;
     }
-    const topicHandlers = this.handlersByTopic.get(message.topic);
-    if (!topicHandlers) return;
-    topicHandlers.forEach((handler) => {
+    this.handlersByQuery.get(event.query_id)?.forEach(handler => {
       try {
-        handler(message.payload);
+        handler(event);
       } catch (err) {
-        logging.warn("Realtime handler error", err);
+        logging.warn('Realtime handler error', err);
       }
     });
   }
 
   private buildConnectUrl(baseUrl: string): string {
-    try {
-      const base =
-        typeof window !== "undefined" ? window.location.href : undefined;
-      const parsed = new URL(baseUrl, base);
-      if (parsed.protocol === "http:") parsed.protocol = "ws:";
-      else if (parsed.protocol === "https:") parsed.protocol = "wss:";
-      parsed.searchParams.set("tab_id", getTabId());
-      return parsed.toString();
-    } catch {
-      const sep = baseUrl.includes("?") ? "&" : "?";
-      return `${baseUrl}${sep}tab_id=${encodeURIComponent(getTabId())}`;
-    }
+    const base =
+      typeof window !== 'undefined' ? window.location.href : 'http://localhost';
+    const parsed = new URL(baseUrl, base);
+    if (parsed.protocol === 'http:') parsed.protocol = 'ws:';
+    else if (parsed.protocol === 'https:') parsed.protocol = 'wss:';
+    parsed.searchParams.set('channel_id', this.channelId);
+    return parsed.toString();
   }
 
   private hasActiveSocket(): boolean {
@@ -175,7 +171,6 @@ export class RealtimeClient {
 
   private teardownSocket(): void {
     if (this.reconnectTimeoutId) clearTimeout(this.reconnectTimeoutId);
-    if (this.keepaliveTimeoutId) clearTimeout(this.keepaliveTimeoutId);
     if (this.socket) {
       this.socket.onopen = null;
       this.socket.onmessage = null;
@@ -192,54 +187,27 @@ export class RealtimeClient {
 
   private openSocket(thisGeneration: number, reason: RealtimeOpenReason): void {
     if (thisGeneration !== this.generation) return;
-    if (!this.enabled || !this.url || typeof WebSocket === "undefined") return;
-    const connectUrl = this.buildConnectUrl(this.url);
-    this.emitState("connecting");
+    if (!this.url || typeof WebSocket === 'undefined') return;
+    this.emitState('connecting');
     let ws: WebSocket;
     try {
-      ws = new WebSocket(connectUrl);
+      ws = new WebSocket(this.buildConnectUrl(this.url));
     } catch (err) {
-      logging.warn("Failed to open realtime WebSocket", err);
+      logging.warn('Failed to open realtime WebSocket', err);
       this.scheduleReconnect(thisGeneration);
       return;
     }
     this.socket = ws;
 
-    if (this.enabled && this.tokenLifetimeMs > 0) {
-      this.keepaliveTimeoutId = window.setTimeout(() => {
-        if (
-          thisGeneration !== this.generation ||
-          this.socket !== ws ||
-          ws.readyState !== RealtimeClient.WS_OPEN
-        ) {
-          return;
-        }
-        Client.get({ endpoint: RealtimeClient.COOKIE_REFRESH_ENDPOINT })
-          .catch(() => {})
-          .finally(() => {
-            if (
-              thisGeneration !== this.generation ||
-              this.socket !== ws ||
-              ws.readyState !== RealtimeClient.WS_OPEN
-            ) {
-              return;
-            }
-            this.generation += 1;
-            this.teardownSocket();
-            this.openSocket(this.generation, "keepalive");
-          });
-      }, this.tokenLifetimeMs * RealtimeClient.KEEPALIVE_FRACTION);
-    }
-
     ws.onopen = () => {
       if (thisGeneration !== this.generation) return;
       this.reconnectAttempts = 0;
-      this.emitState("open");
-      this.openListeners.forEach((listener) => {
+      this.emitState('open');
+      this.openListeners.forEach(listener => {
         try {
           listener(reason);
         } catch (err) {
-          logging.warn("Realtime open-listener error", err);
+          logging.warn('Realtime open-listener error', err);
         }
       });
     };
@@ -259,27 +227,15 @@ export class RealtimeClient {
   }
 
   public connect(config?: RealtimeConfig): void {
-    const conf = config ?? getBootstrapData().common.conf;
-    const nextEnabled = Boolean(conf?.WEBSOCKET_ENABLE);
-    const nextUrl = conf?.WEBSOCKET_URL;
-
-    if (
-      this.started &&
-      this.enabled === nextEnabled &&
-      this.url === nextUrl &&
-      (!nextEnabled || this.hasActiveSocket())
-    ) {
-      return;
-    }
+    const nextUrl = config?.WEBSOCKET_URL ?? DEFAULT_WEBSOCKET_URL;
+    if (this.started && this.url === nextUrl && this.hasActiveSocket()) return;
 
     this.teardownSocket();
     this.generation += 1;
     this.reconnectAttempts = 0;
     this.started = true;
-    this.enabled = nextEnabled;
     this.url = nextUrl;
-    this.tokenLifetimeMs = (conf?.WEBSOCKET_JWT_EXPIRATION_SECONDS ?? 0) * 1000;
-    this.openSocket(this.generation, "initial");
+    this.openSocket(this.generation, 'initial');
   }
 
   public disconnect(): void {
@@ -288,40 +244,27 @@ export class RealtimeClient {
     this.teardownSocket();
   }
 
-  public subscribe(topic: string, handler: RealtimeHandler): () => void {
-    let topicHandlers = this.handlersByTopic.get(topic);
-    if (!topicHandlers) {
-      topicHandlers = new Set();
-      this.handlersByTopic.set(topic, topicHandlers);
+  public subscribe(queryId: string, handler: RealtimeHandler): () => void {
+    let queryHandlers = this.handlersByQuery.get(queryId);
+    if (!queryHandlers) {
+      queryHandlers = new Set();
+      this.handlersByQuery.set(queryId, queryHandlers);
     }
-    topicHandlers.add(handler);
+    queryHandlers.add(handler);
     if (!this.started) this.connect();
 
     return () => {
-      const current = this.handlersByTopic.get(topic);
+      const current = this.handlersByQuery.get(queryId);
       if (!current) return;
       current.delete(handler);
-      if (current.size === 0) this.handlersByTopic.delete(topic);
+      if (current.size === 0) this.handlersByQuery.delete(queryId);
     };
-  }
-
-  public resetForTests(): void {
-    this.disconnect();
-    this.handlersByTopic.clear();
-    this.openListeners.clear();
-    this.stateListeners.clear();
-    this.reconnectAttempts = 0;
-    this.started = false;
-    this.enabled = false;
-    this.url = undefined;
-  }
-
-  public emitOpenForTests(reason: RealtimeOpenReason = "reconnect"): void {
-    this.openListeners.forEach((listener) => listener(reason));
   }
 }
 
 export const defaultRealtimeClient = new RealtimeClient();
+
+export const getRealtimeChannelId = () => defaultRealtimeClient.channelId;
 
 export const subscribeRealtimeState = (listener: RealtimeStateListener) =>
   defaultRealtimeClient.subscribeState(listener);
@@ -329,20 +272,10 @@ export const subscribeRealtimeState = (listener: RealtimeStateListener) =>
 export const subscribeRealtimeOpen = (listener: RealtimeOpenListener) =>
   defaultRealtimeClient.subscribeOpen(listener);
 
-export const dispatchRealtimeMessage = (rawData: string) =>
-  defaultRealtimeClient.dispatchMessage(rawData);
-
 export const connectRealtime = (config?: RealtimeConfig) =>
   defaultRealtimeClient.connect(config);
 
 export const disconnectRealtime = () => defaultRealtimeClient.disconnect();
 
-export const subscribeRealtime = (topic: string, handler: RealtimeHandler) =>
-  defaultRealtimeClient.subscribe(topic, handler);
-
-export const resetRealtimeForTests = () =>
-  defaultRealtimeClient.resetForTests();
-
-export const emitRealtimeOpenForTests = (
-  reason: RealtimeOpenReason = "reconnect",
-) => defaultRealtimeClient.emitOpenForTests(reason);
+export const subscribeRealtime = (queryId: string, handler: RealtimeHandler) =>
+  defaultRealtimeClient.subscribe(queryId, handler);
