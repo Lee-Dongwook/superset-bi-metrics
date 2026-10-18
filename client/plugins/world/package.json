@@ -1,0 +1,22 @@
+{
+  "name": "@bi-metrics/plugin-world",
+  "version": "0.1.0",
+  "files": [
+    "esm",
+    "lib"
+  ],
+  "sideEffects": false,
+  "main": "lib/index.js",
+  "module": "esm/index.js",
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@bi-metrics/core": "workspace:*",
+    "d3": "^7.9.0",
+    "react": "^19.3.0"
+  },
+  "devDependencies": {
+    "@types/d3": "^7.4.3"
+  }
+}
