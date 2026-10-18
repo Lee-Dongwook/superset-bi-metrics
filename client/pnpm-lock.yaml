@@ -157,6 +157,9 @@ importers:
       '@babel/runtime':
         specifier: ^8.0.7
         version: 8.0.7
+      '@bi-metrics/core':
+        specifier: workspace:*
+        version: link:../core
       '@braintree/sanitize-url':
         specifier: ^7.1.2
         version: 7.1.2
@@ -248,6 +251,9 @@ importers:
 
   plugins/echarts:
     dependencies:
+      '@bi-metrics/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
       '@types/d3-array':
         specifier: ^3.2.2
         version: 3.2.2
