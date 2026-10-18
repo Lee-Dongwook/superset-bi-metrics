@@ -36,3 +36,5 @@ export enum StackControlsValue {
   Stream = "Stream",
   Expand = "Expand",
 }
+
+export const DEFAULT_LOCALE = "en";

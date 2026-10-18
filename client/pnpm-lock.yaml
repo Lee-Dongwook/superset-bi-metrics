@@ -263,6 +263,9 @@ importers:
       acorn:
         specifier: ^8.19.0
         version: 8.19.0
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
       d3-array:
         specifier: ^3.2.4
         version: 3.2.4
@@ -284,6 +287,10 @@ importers:
       react:
         specifier: ^19.3.0
         version: 19.3.0
+    devDependencies:
+      '@types/lodash-es':
+        specifier: ^4.17.12
+        version: 4.17.12
 
 packages:
 
