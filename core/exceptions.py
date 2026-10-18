@@ -219,3 +219,6 @@ class CoreResultsBackendNotConfigureException(CoreErrorException):
 
 class ScreenshotImageNotAvailableException(CoreException):
     status = 404
+
+class TemplateException(CoreException):
+    status = 422
