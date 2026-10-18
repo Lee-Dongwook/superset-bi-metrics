@@ -1,7 +1,11 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "baseUrl": "../..",
+    "paths": {
+      "@bi-metrics/plugin-echarts/*": ["./src/*"],
+      "@bi-metrics/ui/*": ["../../packages/ui/lib/*"],
+      "*": ["../../*"]
+    },
     "outDir": "lib",
     "rootDir": "src",
     "declarationDir": "lib"

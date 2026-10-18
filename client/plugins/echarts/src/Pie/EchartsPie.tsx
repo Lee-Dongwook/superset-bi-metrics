@@ -1,7 +1,7 @@
-import { PieChartTransformedProps } from "./types";
-import Echart from "../components/Echart";
-import { allEventHandlers } from "../utils/EventHandlers";
-import { useLegendEventHandlers } from "../utils/legendEventHandlers";
+import { PieChartTransformedProps } from "@bi-metrics/plugin-echarts/Pie/types";
+import Echart from "@bi-metrics/plugin-echarts/components/Echart";
+import { allEventHandlers } from "@bi-metrics/plugin-echarts/utils/EventHandlers";
+import { useLegendEventHandlers } from "@bi-metrics/plugin-echarts/utils/legendEventHandlers";
 
 export default function EchartsPie(props: PieChartTransformedProps) {
   const {

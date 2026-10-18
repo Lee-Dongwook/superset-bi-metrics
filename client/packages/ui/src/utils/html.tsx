@@ -116,3 +116,14 @@ export function isProbablyHTML(text: string) {
     return KNOWN_HTML_TAGS.has(tagName);
   });
 }
+
+// mock: escapes everything instead of an allowlist sanitizer
+export function sanitizeHtml(htmlString: string): string {
+  return htmlString.replace(
+    /[&<>"']/g,
+    (char) =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[
+        char
+      ]!,
+  );
+}

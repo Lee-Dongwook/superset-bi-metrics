@@ -1,1 +1,1 @@
-export * from "./echartsLocale";
+export * from "@bi-metrics/plugin-echarts/components/echartsLocale";

@@ -1,3 +1,8 @@
+import type {
+  ContextMenuFilters,
+  SetDataMaskHook,
+} from "@bi-metrics/ui/chart/types/Base";
+
 export type HandlerFunction = (...args: unknown[]) => void;
 
 export enum Behavior {
@@ -57,4 +62,26 @@ export enum AxisType {
 
 export interface LegendState {
   [key: string]: boolean;
+}
+
+// mock: plain interface in place of the ChartProps class
+export interface ChartProps<FormData extends PlainObject = PlainObject> {
+  datasource?: PlainObject;
+  formData: FormData;
+  height: number;
+  width: number;
+  hooks: {
+    onContextMenu?: (
+      clientX: number,
+      clientY: number,
+      filters?: ContextMenuFilters,
+    ) => void;
+    setDataMask?: SetDataMaskHook;
+    onLegendStateChanged?: (state: LegendState) => void;
+    onLegendScroll?: (currentIndex: number) => void;
+  };
+  filterState: FilterState;
+  queriesData: PlainObject[];
+  emitCrossFilters?: boolean;
+  inContextMenu?: boolean;
 }

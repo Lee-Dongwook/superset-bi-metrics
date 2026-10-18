@@ -8,7 +8,9 @@
     "build": "pnpm build:packages && webpack --mode production",
     "dev": "pnpm build:packages && webpack serve --mode development",
     "typecheck": "pnpm build:packages && tsc --noEmit",
-    "test": "jest"
+    "test": "jest",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
   },
   "dependencies": {
     "@bi-metrics/core": "workspace:*",
@@ -34,11 +36,14 @@
     "@babel/preset-react": "^8.0.1",
     "@babel/preset-typescript": "^8.0.7",
     "@playwright/test": "^1.64.0",
+    "@storybook/addon-docs": "10.6.2",
+    "@storybook/react-vite": "10.6.2",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/jest": "^30.0.0",
     "@types/node": "^26.6.5",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "6.1.2",
     "babel-jest": "^30.5.2",
     "babel-loader": "^10.1.1",
     "css-loader": "^7.1.5",
@@ -46,9 +51,11 @@
     "jest": "^30.5.2",
     "postcss": "^8.5.30",
     "postcss-loader": "^8.2.1",
+    "storybook": "10.6.2",
     "style-loader": "^4.0.0",
     "tailwindcss": "^4.3.3",
     "typescript": "^7.0.2",
+    "vite": "8.3.4",
     "webpack": "^5.111.1",
     "webpack-cli": "^7.2.3",
     "webpack-dev-server": "^5.2.6"

@@ -1,5 +1,13 @@
-import { BinaryOperator } from "@bi-metrics/ui/chart/types/Operator";
-import { QueryFormColumn, QueryFormMetric } from "./QueryFormData";
+import {
+  BinaryOperator,
+  SetOperator,
+  UnaryOperator,
+} from "@bi-metrics/ui/chart/types/Operator";
+import {
+  QueryFormColumn,
+  QueryFormMetric,
+  QueryFormOrderBy,
+} from "./QueryFormData";
 import { DataRecordValue } from "./QueryResponse";
 import { TimeGranularity } from "@bi-metrics/ui/formats/time/types";
 import { AnnotationLayer } from "./AnnotationLayer";
@@ -24,6 +32,35 @@ export type BiMetricsError<ExtraType = Record<string, any> | null> = {
   level: ErrorLevel;
   message: string;
 };
+// mock: minimal shapes until the full query object types are ported
+export type QueryFields = {
+  columns?: QueryFormColumn[];
+  metrics?: QueryFormMetric[];
+  orderby?: QueryFormOrderBy[];
+};
+
+export type ResidualQueryObjectData = {
+  [key: string]: unknown;
+};
+
+export type AppliedTimeExtras = {
+  [key: string]: string;
+};
+
+export type QueryObjectExtras = Partial<{
+  relative_start?: string;
+  relative_end?: string;
+  time_grain_sqla?: TimeGranularity;
+  time_compare?: string;
+  having?: string;
+  where?: string;
+}>;
+
+export type PostProcessingRule = {
+  operation: string;
+  options?: JsonObject;
+};
+
 export interface QueryObject
   extends QueryFields, TimeRange, ResidualQueryObjectData {
   annotation_layers?: AnnotationLayer[];
@@ -40,6 +77,7 @@ export interface QueryObject
   row_offset?: number;
   time_column?: string;
   time_grain?: string;
+  time_compare?: string;
   order_desc?: boolean;
   url_params?: Record<string, string>;
   custom_params?: JsonObject;
@@ -61,3 +99,19 @@ export type BinaryQueryObjectFilterClause = BaseQueryObjectFilterClause & {
   val: DataRecordValue;
   formattedVal?: string;
 };
+
+export type SetQueryObjectFilterClause = BaseQueryObjectFilterClause & {
+  op: SetOperator;
+  val: DataRecordValue[];
+  formattedVal?: string[];
+};
+
+export type UnaryQueryObjectFilterClause = BaseQueryObjectFilterClause & {
+  op: UnaryOperator;
+  formattedVal?: string;
+};
+
+export type QueryObjectFilterClause =
+  | BinaryQueryObjectFilterClause
+  | SetQueryObjectFilterClause
+  | UnaryQueryObjectFilterClause;

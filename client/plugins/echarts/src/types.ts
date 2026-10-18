@@ -1,6 +1,16 @@
 import { RefObject, Ref } from "react";
 import type { EChartsCoreOption, EChartsType } from "echarts/core";
-import { LegendState, QueryFormColumn } from "packages/ui/lib";
+import {
+  ChartDataResponseResult,
+  ChartProps,
+  ContextMenuFilters,
+  FilterState,
+  HandlerFunction,
+  LegendState,
+  PlainObject,
+  QueryFormColumn,
+  SetDataMaskHook,
+} from "@bi-metrics/ui";
 
 export type Refs = {
   echartRef?: Ref<any>;
@@ -69,3 +79,27 @@ export type CrossFilterTransformedProps = {
   selectedValues: Record<number, string>;
   emitCrossFilters?: boolean;
 };
+
+export enum LegendOrientation {
+  Top = "top",
+  Bottom = "bottom",
+  Left = "left",
+  Right = "right",
+}
+
+export enum LegendType {
+  Scroll = "scroll",
+  Plain = "plain",
+}
+
+export type LegendFormData = {
+  legendMargin: number | null | string;
+  legendOrientation: LegendOrientation;
+  legendType: LegendType;
+  showLegend: boolean;
+  legendSort?: "asc" | "desc" | null;
+};
+
+export interface BaseChartProps<T extends PlainObject> extends ChartProps<T> {
+  queriesData: ChartDataResponseResult[];
+}

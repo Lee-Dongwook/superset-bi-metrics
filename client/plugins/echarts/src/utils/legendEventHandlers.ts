@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef } from "react";
-import { LegendState } from "packages/ui/lib";
-import { EventHandlers } from "../types";
+import { LegendState } from "@bi-metrics/ui";
+import { EventHandlers } from "@bi-metrics/plugin-echarts/types";
 
 export const LEGEND_DOUBLE_CLICK_INTERVAL = 300;
 

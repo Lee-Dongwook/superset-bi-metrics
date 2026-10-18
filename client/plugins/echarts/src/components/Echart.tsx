@@ -45,10 +45,14 @@ import {
   MarkLineComponent,
 } from "echarts/components";
 import { LabelLayout, LegacyGridContainLabel } from "echarts/features";
-import { mergeEchartsThemeOverrides } from "../utils/themeOverrides";
-import { loadLocale } from "./echartsLocale";
-import { DEFAULT_LOCALE } from "../constants";
-import { EchartsHandler, EchartsProps, QueryEventHandlers } from "../types";
+import { mergeEchartsThemeOverrides } from "@bi-metrics/plugin-echarts/utils/themeOverrides";
+import { loadLocale } from "@bi-metrics/plugin-echarts/components/echartsLocale";
+import { DEFAULT_LOCALE } from "@bi-metrics/plugin-echarts/constants";
+import {
+  EchartsHandler,
+  EchartsProps,
+  QueryEventHandlers,
+} from "@bi-metrics/plugin-echarts/types";
 
 interface ExplorePageState {
   common?: {
@@ -181,11 +185,11 @@ function EChart(
     const getCssVariable = (variable: string) =>
       rootStyle.getPropertyValue(variable).trim();
 
-    const fg = `hsl(${getCssVariable("--foreground")})`;
-    const mutedFg = `hsl(${getCssVariable("--muted-foreground")})`;
-    const primary = `hsl(${getCssVariable("--primary")})`;
-    const border = `hsl(${getCssVariable("--border")})`;
-    const cardBg = `hsl(${getCssVariable("--card")})`;
+    const fg = getCssVariable("--foreground");
+    const mutedFg = getCssVariable("--muted-foreground");
+    const primary = getCssVariable("--primary");
+    const border = getCssVariable("--border");
+    const cardBg = getCssVariable("--card");
 
     const echartsTheme: EChartsTheme = {
       textStyle: {
@@ -220,10 +224,12 @@ function EChart(
       minorSplitLine: { lineStyle: { color: border } },
     };
 
+    // only theme axes the chart declares, otherwise ECharts draws empty ones (e.g. pie)
+    const { xAxis, yAxis } = echartOptions as { xAxis?: unknown; yAxis?: unknown };
     return {
       ...echartsTheme,
-      xAxis: axisConfig,
-      yAxis: axisConfig,
+      ...(xAxis ? { xAxis: axisConfig } : {}),
+      ...(yAxis ? { yAxis: axisConfig } : {}),
     };
   };
 

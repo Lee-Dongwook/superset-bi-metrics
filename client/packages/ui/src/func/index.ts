@@ -1,5 +1,7 @@
 import Mexp from "math-expression-evaluator";
 
+export * from "./format";
+
 const mexp = new Mexp();
 
 const REPLACE_OPERATORS: [RegExp, string][] = [

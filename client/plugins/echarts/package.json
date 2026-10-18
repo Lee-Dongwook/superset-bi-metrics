@@ -12,6 +12,7 @@
     "access": "public"
   },
   "dependencies": {
+    "@bi-metrics/core": "workspace:*",
     "@bi-metrics/ui": "workspace:*",
     "@types/d3-array": "^3.2.2",
     "@types/react-redux": "^7.1.34",
@@ -23,7 +24,8 @@
     "lodash": "^4.18.1",
     "lodash-es": "^4.18.1",
     "memoize-one": "^6.0.0",
-    "react": "^19.3.0"
+    "react": "^19.3.0",
+    "react-redux": "^9.3.0"
   },
   "devDependencies": {
     "@types/lodash-es": "^4.17.12"

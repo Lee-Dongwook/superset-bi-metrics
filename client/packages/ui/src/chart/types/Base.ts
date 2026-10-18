@@ -1,14 +1,9 @@
 import { JsonObject } from "@bi-metrics/ui/connection";
+import { FilterState } from "@bi-metrics/ui/chart/types";
 import {
   BinaryQueryObjectFilterClause,
   ExtraFormData,
 } from "@bi-metrics/ui/query";
-
-export type FilterState = {
-  value?: any;
-  customColumnLabel?: string;
-  [key: string]: any;
-};
 
 export type DataMask = {
   extraFormData?: ExtraFormData;

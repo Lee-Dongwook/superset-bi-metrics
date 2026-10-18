@@ -7,13 +7,13 @@ import {
   getColumnLabel,
   getNumberFormatter,
   getTimeFormatter,
-} from "packages/ui/lib";
+} from "@bi-metrics/ui";
 import {
   BaseTransformedProps,
   CrossFilterTransformedProps,
   EventHandlers,
-} from "../types";
-import { formatSeriesName } from "./series";
+} from "@bi-metrics/plugin-echarts/types";
+import { formatSeriesName } from "@bi-metrics/plugin-echarts/utils/series";
 
 export type Event = {
   name: string;
@@ -110,10 +110,13 @@ export const contextMenuEventHandler =
             col: dimension,
             op: "==",
             val: values[i],
-            formattedVal: formatSeriesName(values[i], {
-              timeFormatter: getTimeFormatter(formData.dateFormat),
-              numberFormatter: getNumberFormatter(formData.numberFormat),
-              coltype: coltypeMapping?.[getColumnLabel(dimension)],
+            formattedVal: formatSeriesName({
+              name: values[i],
+              innerModule: {
+                timeFormatter: getTimeFormatter(formData.dateFormat),
+                numberFormatter: getNumberFormatter(formData.numberFormat),
+                coltype: coltypeMapping?.[getColumnLabel(dimension)],
+              },
             }),
           });
         });

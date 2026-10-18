@@ -9,6 +9,11 @@ import {
 } from "@bi-metrics/ui/chart/types/Operator";
 import { AnnotationLayer } from "./AnnotationLayer";
 import { JsonObject } from "@bi-metrics/ui/connection";
+import type {
+  QueryObject,
+  QueryObjectExtras,
+  QueryObjectFilterClause,
+} from "./Query";
 
 export type QueryFormMetric = SavedMetric | AdhocMetric;
 export type QueryFormColumn = PhysicalColumn | AdhocColumn;
