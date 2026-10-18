@@ -20,9 +20,12 @@ const workspaceAliases = Object.fromEntries(
 );
 
 const config: StorybookConfig = {
-  stories: WORKSPACE_DIRS.map(
-    (group) => `${CLIENT_DIR}/${group}/*/src/**/*.stories.@(ts|tsx)`,
-  ),
+  stories: [
+    `${CLIENT_DIR}/src/**/*.stories.@(ts|tsx)`,
+    ...WORKSPACE_DIRS.map(
+      (group) => `${CLIENT_DIR}/${group}/*/src/**/*.stories.@(ts|tsx)`,
+    ),
+  ],
   addons: ["@storybook/addon-docs"],
   framework: "@storybook/react-vite",
   viteFinal: (viteConfig) =>
