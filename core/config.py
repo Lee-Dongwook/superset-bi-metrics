@@ -55,3 +55,15 @@ ADVANCED_DATA_TYPES = {
     "internet_address": address,
     "port": port,
 }
+
+# Chart data limits and cache defaults (Superset defaults).
+ROW_LIMIT = 50000
+SAMPLES_ROW_LIMIT = 1000
+SQL_MAX_ROW = 100000
+TABLE_VIZ_MAX_ROW_SERVER = 500000
+CACHE_DEFAULT_TIMEOUT = 60 * 60 * 24
+FEATURE_FLAGS: dict[str, bool] = {}
+HASH_ALGORITHM = "sha256"
+SHOW_STACKTRACE = False
+DEFAULT_RELATIVE_START_TIME = "today"
+DEFAULT_RELATIVE_END_TIME = "today"

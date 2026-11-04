@@ -2,13 +2,13 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any, TYPE_CHECKING
 
 if TYPE_CHECKING:
     import pandas as pd
 
-class QueryStatus(Enum):
+class QueryStatus(StrEnum):
     PENDING = "pending"
     RUNNING = "running"
     SUCCESS = "success"

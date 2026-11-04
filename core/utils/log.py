@@ -1,10 +1,11 @@
 from __future__ import annotations
 
+import contextlib
 import functools
 import logging
 import time
 from abc import ABC, abstractmethod
-from typing import Any, Callable
+from typing import Any, Callable, Iterator
 
 from flask import current_app, has_app_context, has_request_context, request
 
@@ -76,6 +77,15 @@ class AbstractEventLogger(ABC):
             return wrapper
 
         return decorate
+
+    @contextlib.contextmanager
+    def log_context(self, action: str, log_to_statsd: bool = True) -> Iterator[None]:
+        """Context-manager form of ``log_this_with_context``: one event with the block's duration."""
+        start = time.perf_counter()
+        try:
+            yield
+        finally:
+            self._emit(action, int((time.perf_counter() - start) * 1000), log_to_statsd)
 
     def _emit(self, action: str, duration_ms: int, log_to_statsd: bool) -> None:
         try:

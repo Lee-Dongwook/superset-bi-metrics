@@ -72,12 +72,26 @@ class AppInitializer:
     def init_app_in_ctx(self) -> None:
         appbuilder.init_app(self.flask_app, db.session)
         self.init_views()
+        self.configure_soft_delete()
         # Models subclass FAB's Model (not db.Model), so create from its metadata.
         # ponytail: create_all only adds missing tables; switch to alembic once migrations exist.
         Model.metadata.create_all(db.engine)
 
+    def configure_soft_delete(self) -> None:
+        from sqlalchemy import event
+        from sqlalchemy.orm import Session
+
+        from core.models.helpers import _add_soft_delete_filter
+
+        if not event.contains(Session, "do_orm_execute", _add_soft_delete_filter):
+            event.listen(Session, "do_orm_execute", _add_soft_delete_filter)
+
     def init_views(self) -> None:
         # Imported here so models/APIs load after the extensions are bound to the app.
+        # Register chart/semantic models (and their tables for create_all).
+        import core.models.core  # noqa: F401
+        import core.models.slice  # noqa: F401
+        import core.semantic.models  # noqa: F401
         from core.cache_keys.api import CacheApi
         from core.css.api import CssTemplateApi
         from core.data.api import AdvancedDataTypeApi

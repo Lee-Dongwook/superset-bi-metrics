@@ -222,3 +222,48 @@ class ScreenshotImageNotAvailableException(CoreException):
 
 class TemplateException(CoreException):
     status = 422
+
+
+class CoreSecurityException(CoreErrorException):
+    status = 403
+
+    def __init__(
+        self, error: CoreError, payload: Optional[dict[str, Any]] = None
+    ) -> None:
+        super().__init__(error)
+        self.payload = payload
+
+
+class QueryObjectValidationError(CoreException):
+    status = 400
+
+
+class QueryObjectValidationMessage(str):
+    """A failed query's error text that keeps its validation cause.
+
+    Serializes as plain text in chart-data payloads, while callers can still
+    read ``.cause`` to report the failure as a validation error. Copies and
+    pickles degrade to the plain text.
+    """
+
+    cause: QueryObjectValidationError
+
+    def __new__(cls, cause: QueryObjectValidationError) -> QueryObjectValidationMessage:
+        message = super().__new__(cls, str(cause))
+        message.cause = cause
+        return message
+
+    def __reduce__(self) -> tuple[type[str], tuple[str]]:
+        return str, (str(self),)
+
+
+class InvalidPostProcessingError(CoreException):
+    status = 400
+
+
+class CacheLoadError(CoreException):
+    status = 404
+
+
+class QueryClauseValidationException(CoreException):
+    status = 400

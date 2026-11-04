@@ -1,4 +1,6 @@
 
+from collections.abc import Iterable
+
 from core.utils.backports import StrEnum
 
 
@@ -32,6 +34,44 @@ QUERY_EARLY_CANCEL_KEY = "early_cancel_query"
 QUERY_DISPATCHED_KEY = "query_dispatched"
 
 LRU_CACHE_MAX_SIZE = 256
+
+
+class CacheRegion(StrEnum):
+    DEFAULT = "default"
+    DATA = "data"
+    THUMBNAIL = "thumbnail"
+
+
+# Special cache timeout value meaning "do not cache".
+CACHE_DISABLED_TIMEOUT = -1
+
+
+class SemanticCacheStatus(StrEnum):
+    """Containment-cache provenance of a semantic query result (HIT/MISS/MIXED)."""
+
+    HIT = "HIT"
+    MISS = "MISS"
+    MIXED = "MIXED"
+
+    @classmethod
+    def from_hits(cls, hits: Iterable[bool]) -> "SemanticCacheStatus":
+        """Roll per-semantic-query hit flags up to one status."""
+        outcomes: tuple[bool, ...] = tuple(hits)
+        if outcomes and all(outcomes):
+            return cls.HIT
+        if any(outcomes):
+            return cls.MIXED
+        return cls.MISS
+
+    @classmethod
+    def combine(cls, statuses: Iterable[object]) -> "SemanticCacheStatus":
+        """Roll per-query statuses up; missing statuses count as misses."""
+        values: tuple[object, ...] = tuple(statuses)
+        if values and all(value == cls.HIT for value in values):
+            return cls.HIT
+        if any(value in (cls.HIT, cls.MIXED) for value in values):
+            return cls.MIXED
+        return cls.MISS
 
 class InstantTimeComparison(StrEnum):
     INHERITED = "r"

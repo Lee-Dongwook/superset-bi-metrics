@@ -22,7 +22,7 @@ from core.exceptions import TemplateException
 from core.constants import LRU_CACHE_MAX_SIZE
 
 if TYPE_CHECKING:
-    from core.models.core import Database
+    from core.common.models import Database
 
 class UndefinedTemplateFunctionException(TemplateException):
     pass

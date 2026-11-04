@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Any, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from ...common_models import Slice
+    from core.models.slice import Slice
 
 CHART_TYPE = "CHART"
 ROOT_ID = "ROOT_ID"
