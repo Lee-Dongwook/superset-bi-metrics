@@ -7,8 +7,7 @@ import warnings
 
 def warn_moved(old: str, new: str) -> None:
     warnings.warn(
-        f"'{old}' is deprecated.",
-        f"use '{new}' instead",
+        f"'{old}' is deprecated, use '{new}' instead",
         DeprecationWarning,
         stacklevel=2,
     )

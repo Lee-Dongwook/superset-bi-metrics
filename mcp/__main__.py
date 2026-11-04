@@ -12,7 +12,7 @@ if os.environ.get("FASTMCP_TRANSPORT", "stdio") == "stdio":
     original_secho = click.secho
 
     def redirect_to_stderr(
-        origianl_func: Callable[..., None],
+        original_func: Callable[..., None],
         *args: Any,
         **kwargs: Any,
     ) -> None:

@@ -51,6 +51,8 @@ Apache Superset의 시각화/대시보드 기능과 Cube.js의 Semantic Layer(�
 | **`sdk/`**       | TypeScript                  | 클라이언트 애플리케이션 및 외부 연동용 TypeScript SDK                                                  |
 | **`extension/`** | Python (FAB, SQLAlchemy)    | Superset Core 연동용 Extension 모델 인터페이스 (`CoreModel`, `Database` 등) 및 MCP 구조                |
 | **`cli/`**       | Python (Click, Jinja2)      | Extension 템플릿 생성, 검증 및 번들링을 위한 CLI 도구                                                  |
+| **`mcp/`**       | Python (FastMCP, Click)     | MCP 서비스 엔트리포인트 (stdio 전송 시 Click 출력을 stderr로 우회)                                     |
+| **`swift/`**     | Swift (Combine)             | A2UI 프로토콜 기반 네이티브 클라이언트 코어 (`DataModel` 상태 관리, 초기 단계)                         |
 | **`docker/`**    | Docker Compose              | 로컬 개발/테스트용 인프라 (PostgreSQL 15, Redis 7)                                                     |
 
 ---

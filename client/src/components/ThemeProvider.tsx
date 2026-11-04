@@ -1,16 +1,10 @@
-import {
-  ReactNode,
-  useContext,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-} from "react";
+import type { ReactNode } from "react";
 
 interface ThemeProviderProps {
   children: ReactNode;
 }
 
-export default function ThemeProvider({}) {
+export default function ThemeProvider({ children }: ThemeProviderProps) {
   //TODO
+  return <>{children}</>;
 }
