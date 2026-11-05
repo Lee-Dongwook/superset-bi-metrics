@@ -6,6 +6,7 @@ from typing import Type
 
 import click
 from click_option_group import optgroup, RequiredAnyOptionGroup
+from core.migrations.shared.utils import paginated_update, try_load_json
 from flask.cli import with_appcontext
 
 from core.extension import db
