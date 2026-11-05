@@ -455,6 +455,18 @@ wheels = [
 ]
 
 [[package]]
+name = "click-option-group"
+version = "0.5.9"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "click" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/ef/ff/d291d66595b30b83d1cb9e314b2c9be7cfc7327d4a0d40a15da2416ea97b/click_option_group-0.5.9.tar.gz", hash = "sha256:f94ed2bc4cf69052e0f29592bd1e771a1789bd7bfc482dd0bc482134aff95823", size = 22222, upload-time = "2025-10-09T09:38:01.474Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/75/45/54bb2d8d4138964a94bef6e9afe48b0be4705ba66ac442ae7d8a8dc4ffef/click_option_group-0.5.9-py3-none-any.whl", hash = "sha256:ad2599248bd373e2e19bec5407967c3eec1d0d4fc4a5e77b08a0481e75991080", size = 11553, upload-time = "2025-10-09T09:38:00.066Z" },
+]
+
+[[package]]
 name = "click-plugins"
 version = "1.1.1.2"
 source = { registry = "https://pypi.org/simple" }
@@ -2460,6 +2472,7 @@ dependencies = [
     { name = "babel" },
     { name = "celery" },
     { name = "click" },
+    { name = "click-option-group" },
     { name = "colorama" },
     { name = "cryptography" },
     { name = "flask" },
@@ -2515,6 +2528,7 @@ requires-dist = [
     { name = "babel", specifier = ">=2.18.0" },
     { name = "celery", specifier = ">=5.6.3" },
     { name = "click", specifier = ">=8.5.0" },
+    { name = "click-option-group", specifier = ">=0.5.9" },
     { name = "colorama", specifier = ">=0.4.6" },
     { name = "cryptography", specifier = ">=50.0.2" },
     { name = "flask", specifier = ">=3.1.3" },
