@@ -10,6 +10,7 @@ from flask.cli import with_appcontext
 
 from core.extension import db
 from .constants import MIGRATIONS
+from core.migrations.shared.migrate_viz.base import Slice, FORM_DATA_BAK_FIELD_NAME, MigrateViz
 
 class VizType(str, Enum):
     AREA = "area"
