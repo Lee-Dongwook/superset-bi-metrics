@@ -28,6 +28,7 @@
     "react-redux": "^9.3.0",
     "redux": "^5.0.1",
     "redux-thunk": "^3.1.0",
+    "rison": "^0.1.1",
     "use-event-callback": "^0.1.0"
   },
   "devDependencies": {
@@ -43,6 +44,7 @@
     "@types/node": "^26.6.5",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
+    "@types/rison": "^0.1.0",
     "@vitejs/plugin-react": "6.1.2",
     "babel-jest": "^30.5.2",
     "babel-loader": "^10.1.1",
