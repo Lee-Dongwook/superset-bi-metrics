@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import rison from "rison";
 import { useIsMobile } from "../../hooks";
+import { WelcomeContainer } from "./ui/components";
 
 interface WelcomeProps {
   user: any;
@@ -26,13 +27,31 @@ function Welcome({ user, addDangerToast }: WelcomeProps) {
   );
   const [isFetchingActivityData, setIsFetchingActivityData] = useState(true);
 
-  return <></>;
+  return (
+    <>
+      {SubmenuExtension ? (
+        <SubmenuExtension {...menuData} />
+      ) : (
+        <SubMenu {...menuData} />
+      )}
+      <WelcomeContainer></WelcomeContainer>
+    </>
+  );
 }
 
-export default function WelcomePage({ user }: WelcomeProps) {
+export function WelcomePage({
+  user,
+  ...props
+}: Omit<WelcomeProps, "user"> & { user?: UserWithPermissionsAndRoles }) {
   const hasUserId = user?.userId != null;
 
-  useEffect(() => {}, []);
+  useEffect(() => {
+    if (!hasUserId) {
+      redirect(RoutePaths.HOME);
+    }
+  }, [hasUserId]);
 
-  return hasUserId ? <Welcome /> : null;
+  return hasUserId ? <Welcome {...props} user={user} /> : null;
 }
+
+export default withToasts(WelcomePage);
