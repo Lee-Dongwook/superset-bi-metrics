@@ -11,9 +11,11 @@ export type DataMask = {
   ownState?: JsonObject;
 };
 
-export type SetDataMaskHook = {
-  ({ filterState, extraFormData, ownState }: DataMask): void;
-};
+export type SetDataMaskHook = ({
+  filterState,
+  extraFormData,
+  ownState,
+}: DataMask) => void;
 
 export interface ContextMenuFilters {
   crossFilter?: {

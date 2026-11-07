@@ -4,7 +4,12 @@ import rison from "rison";
 import { useIsMobile } from "../../hooks";
 import { WelcomeContainer } from "./ui/components";
 import { userHasPermission } from "../../dashboard/utils";
-import { redirect } from "../../utils";
+import {
+  LocalStorageKeys,
+  redirect,
+  setItem,
+  dangerouslySetItemDoNotUse,
+} from "../../utils";
 import { UserWithPermissionsAndRoles } from "../../types";
 import withToasts from "../../components/Toast/withToast";
 

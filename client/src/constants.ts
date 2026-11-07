@@ -5,6 +5,15 @@ export enum Actions {
   UPDATE = "update",
 }
 
+export enum TableTab {
+  Favorite = "Favorite",
+  Mine = "Mine",
+  Other = "Other",
+  Viewed = "Viewed",
+  Created = "Created",
+  Edited = "Edited",
+}
+
 export const DEFAULT_COMMON_BOOTSTRAP_DATA: CommonBootstrapData = {
   application_root: "/",
   static_assets_prefix: "",

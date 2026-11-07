@@ -4,3 +4,4 @@ export * from "./QueryFormData";
 export * from "./Metric";
 export * from "./QueryResponse";
 export * from "./Datasource";
+export * from "./Dashboard";
