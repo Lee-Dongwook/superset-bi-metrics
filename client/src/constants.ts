@@ -61,3 +61,7 @@ export const DEFAULT_COMMON_BOOTSTRAP_DATA: CommonBootstrapData = {
 export const DEFAULT_BOOTSTRAP_DATA: BootstrapData = {
   common: DEFAULT_COMMON_BOOTSTRAP_DATA,
 };
+
+export const RoutePaths = {
+  HOME: "/welcome/",
+};

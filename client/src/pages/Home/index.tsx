@@ -15,6 +15,9 @@ import withToasts from "../../components/Toast/withToast";
 
 import { WelcomeExtensionInner } from "./WelcomeExtensionInner";
 import { WelcomeExtensionInnerItemsConverter } from "./WelcomeExtensionInnerItemsConverter";
+import SubMenu, { SubMenuProps } from "../../features/home/SubMenu";
+import { RoutePaths } from "../../constants";
+import { t } from "@bi-metrics/core/translation";
 
 interface WelcomeProps {
   user: any;
@@ -33,8 +36,8 @@ function Welcome({ user, addDangerToast }: WelcomeProps) {
   const recent = `/api/v1/log/recent_activity/?q=${params}`;
 
   const [activeChild, setActiveChild] = useState("Loading");
-  const [checked, setChecked] = useState(defaultChecked);
-  const [activityData, setActivityData] = useState<ActivityData | null>(null);
+  // const [checked, setChecked] = useState(defaultChecked);
+  // const [activityData, setActivityData] = useState<ActivityData | null>(null);
   const [chartData, setChartData] = useState<Array<object> | null>(null);
   const [queryData, setQueryData] = useState<Array<object> | null>(null);
   const [dashboardData, setDashboardData] = useState<Array<object> | null>(
@@ -42,19 +45,25 @@ function Welcome({ user, addDangerToast }: WelcomeProps) {
   );
   const [isFetchingActivityData, setIsFetchingActivityData] = useState(true);
 
-  const [activeState, setActiveState] = useState<Array<string>>(collapseState);
+  // const [activeState, setActiveState] = useState<Array<string>>(collapseState);
 
-  const handleCollapse = (state: Array<string>) => {
-    setActiveState(state);
-    setItem(LocalStorageKeys.HomepageCollapseState, state);
-  };
+  // const handleCollapse = (state: Array<string>) => {
+  //   setActiveState(state);
+  //   setItem(LocalStorageKeys.HomepageCollapseState, state);
+  // };
 
+  const SubmenuExtension = extensionsRegistry.get("home.submenu");
   const WelcomeTopExtension = extensionsRegistry.get("welcome.banner");
   const WelcomeMainExtension = extensionsRegistry.get(
     "welcome.main.replacement",
   );
 
   const welcomeExtensionInnerItems = WelcomeExtensionInnerItemsConverter();
+
+  const menuData: SubMenuProps = {
+    activeChild: "Home",
+    name: t("Home"),
+  };
 
   return (
     <>
@@ -64,13 +73,13 @@ function Welcome({ user, addDangerToast }: WelcomeProps) {
         <SubMenu {...menuData} />
       )}
       <WelcomeContainer>
-        {(!WelcomeTopExtension || !WelcomeMainExtension) && (
+        {/* {(!WelcomeTopExtension || !WelcomeMainExtension) && (
           <WelcomeExtensionInner
             activeState={activeState}
             handleCollapse={handleCollapse}
             items={welcomeExtensionInnerItems}
           />
-        )}
+        )} */}
       </WelcomeContainer>
     </>
   );
