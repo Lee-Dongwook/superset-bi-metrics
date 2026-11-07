@@ -1,16 +1,15 @@
 import { Card as AntdCard } from "antd";
 import type { CardProps as AntdCardProps } from "antd/es/card";
 import { createStyles } from "antd-style";
-import type { BiMetricsTheme } from "../../theme";
 
-interface CardProps extends AntdCardProps {
+export interface CardProps extends AntdCardProps {
   padded?: boolean;
 }
 
-const useStyles = createStyles(({ theme }, padded?: boolean) => ({
+const useStyles = createStyles(({ token }, padded?: boolean) => ({
   card: {
     ".ant-card-body": {
-      padding: padded ? theme.sizeUnit * 4 : theme.sizeUnit,
+      padding: padded ? token.sizeUnit * 4 : token.sizeUnit,
     },
   },
 }));
