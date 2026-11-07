@@ -1,4 +1,4 @@
-import { BootstrapData, CommonBootstrapData } from "./types";
+import type { BootstrapData, CommonBootstrapData } from "./types";
 
 export enum Actions {
   CREATE = "create",

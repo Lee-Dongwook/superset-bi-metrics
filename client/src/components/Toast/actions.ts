@@ -1,5 +1,5 @@
 import { nanoid } from "nanoid";
-import { ToastMeta, ToastType } from "./types";
+import { ToastType, type ToastMeta } from "./types";
 
 type ToastOptions = Partial<Omit<ToastMeta, "id" | "toastType" | "text">>;
 

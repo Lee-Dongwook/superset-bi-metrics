@@ -1,4 +1,4 @@
-import { FunctionComponent, ReactNode, useState } from "react";
+import { useState, type FunctionComponent, type ReactNode } from "react";
 
 type MenuChild = {
   label: string;

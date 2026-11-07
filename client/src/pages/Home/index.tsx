@@ -10,13 +10,12 @@ import {
   setItem,
   dangerouslySetItemDoNotUse,
 } from "../../utils";
-import { UserWithPermissionsAndRoles } from "../../types";
+import type { UserWithPermissionsAndRoles } from "../../types";
 import withToasts from "../../components/Toast/withToast";
 
 import { WelcomeExtensionInner } from "./WelcomeExtensionInner";
-import { WelcomeExtensionInnerItemsConverter } from "./WelcomeExtensionInnerItemsConverter";
-import SubMenu, { SubMenuProps } from "../../features/home/SubMenu";
-import { RoutePaths } from "../../constants";
+// import { WelcomeExtensionInnerItemsConverter } from "./WelcomeExtensionInnerItemsConverter";
+import SubMenu, { type SubMenuProps } from "../../features/home/SubMenu";
 import { t } from "@bi-metrics/core/translation";
 
 interface WelcomeProps {
@@ -58,7 +57,7 @@ function Welcome({ user, addDangerToast }: WelcomeProps) {
     "welcome.main.replacement",
   );
 
-  const welcomeExtensionInnerItems = WelcomeExtensionInnerItemsConverter();
+  // const welcomeExtensionInnerItems = WelcomeExtensionInnerItemsConverter();
 
   const menuData: SubMenuProps = {
     activeChild: "Home",
@@ -93,7 +92,7 @@ export function WelcomePage({
 
   useEffect(() => {
     if (!hasUserId) {
-      redirect(RoutePaths.HOME);
+      redirect("/login/");
     }
   }, [hasUserId]);
 

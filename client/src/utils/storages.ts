@@ -1,5 +1,5 @@
 import { TableTab } from "../constants";
-import { DashboardContextForExplore } from "../types";
+import type { DashboardContextForExplore } from "../types";
 
 export enum LocalStorageKeys {
   Database = "db",

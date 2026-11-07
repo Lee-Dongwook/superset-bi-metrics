@@ -1,5 +1,5 @@
 import { Collapse } from "@bi-metrics/ui";
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 
 export interface WelcomeExtensionInnerItems {
   key: string;

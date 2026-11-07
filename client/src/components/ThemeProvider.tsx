@@ -1,10 +1,6 @@
 import type { ReactNode } from "react";
+import { themeObject } from "@bi-metrics/core/theme";
 
-interface ThemeProviderProps {
-  children: ReactNode;
-}
-
-export default function ThemeProvider({ children }: ThemeProviderProps) {
-  //TODO
-  return <>{children}</>;
+export default function ThemeProvider({ children }: { children: ReactNode }) {
+  return <themeObject.ThemeProvider>{children}</themeObject.ThemeProvider>;
 }

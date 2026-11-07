@@ -4,15 +4,36 @@ import { APP_ROOT_PATH_RE } from "./constants";
 
 let cachedBootstrapData: BootstrapData | null = null;
 
+// ponytail: dev-only fake user until the Flask backend injects bootstrap data.
+const DEV_BOOTSTRAP_DATA: BootstrapData = {
+  ...DEFAULT_BOOTSTRAP_DATA,
+  user: {
+    userId: 1,
+    username: "admin",
+    firstName: "Dev",
+    lastName: "User",
+    isActive: true,
+    isAnonymous: false,
+    permissions: {},
+    roles: { Admin: [] },
+    groups: [],
+  },
+};
+
+const FALLBACK_BOOTSTRAP_DATA =
+  process.env.NODE_ENV === "development"
+    ? DEV_BOOTSTRAP_DATA
+    : DEFAULT_BOOTSTRAP_DATA;
+
 export default function getBootstrapData(): BootstrapData {
   if (cachedBootstrapData === null) {
     const appContainer = document.getElementById("app");
     const dataBootstrap = appContainer?.dataset.bootstrap;
     cachedBootstrapData = dataBootstrap
       ? JSON.parse(dataBootstrap)
-      : DEFAULT_BOOTSTRAP_DATA;
+      : FALLBACK_BOOTSTRAP_DATA;
   }
-  return cachedBootstrapData ?? DEFAULT_BOOTSTRAP_DATA;
+  return cachedBootstrapData ?? FALLBACK_BOOTSTRAP_DATA;
 }
 
 const normalizePathWithFallback = (

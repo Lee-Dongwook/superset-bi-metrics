@@ -1,5 +1,5 @@
-import { TimeLocaleDefinition } from "d3-time-format";
-import { FormatLocaleDefinition } from "d3-format";
+import type { TimeLocaleDefinition } from "d3-time-format";
+import type { FormatLocaleDefinition } from "d3-format";
 import { isPlainObject } from "lodash-es";
 import type {
   JsonObject,
