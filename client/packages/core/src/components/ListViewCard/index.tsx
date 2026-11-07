@@ -1,6 +1,6 @@
 import type { ReactNode, ComponentType, ReactElement } from "react";
 import type { BackgroundPosition } from "./ImageLoader";
-import { useTheme } from "../../theme";
+// import { useTheme } from "../../theme";
 
 export interface LinkProps {
   to: string;
@@ -47,11 +47,10 @@ function ListViewCard({
   certifiedBy,
   certificationDetails,
 }: ListViewCardProps) {
-  const Link = url && linkComponent ? linkComponent : AnchorLink;
-  const theme = useTheme();
-
-  return <StyledCard></StyledCard>;
+  // const Link = url && linkComponent ? linkComponent : AnchorLink;
+  // const theme = useTheme();
+  // return <StyledCard></StyledCard>;
 }
 
-export { ListViewCard, ImageLoader };
+export { ListViewCard };
 export type { ListViewCardProps };

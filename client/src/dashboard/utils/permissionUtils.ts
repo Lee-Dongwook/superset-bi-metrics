@@ -1,4 +1,7 @@
-import type { UndefinedUser, UserWithPermissionsAndRoles } from "../types";
+import type {
+  UndefinedUser,
+  UserWithPermissionsAndRoles,
+} from "../../types/bootStrapTypes";
 
 export function userHasPermission(
   user: UserWithPermissionsAndRoles | UndefinedUser,
