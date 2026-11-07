@@ -1,4 +1,5 @@
 import { useTheme as useEmotionTheme } from "@emotion/react";
+import emotionStyled, { CreateStyled } from "@emotion/styled";
 import { Theme } from "./Theme";
 import type { BiMetricsTheme } from "./types";
 
@@ -7,7 +8,6 @@ declare module "@emotion/react" {
 }
 
 export { css, keyframes, Global } from "@emotion/react";
-export { default as styled } from "@emotion/styled";
 
 /** Emotion's useTheme, but fails loudly outside a ThemeProvider (emotion returns {} there). */
 export function useTheme() {
@@ -17,6 +17,8 @@ export function useTheme() {
   }
   return theme;
 }
+
+const styled: CreateStyled = emotionStyled;
 
 export const themeObject = Theme.fromConfig();
 export const theme = themeObject.theme;
@@ -32,3 +34,4 @@ export type {
   AnyThemeConfig,
 } from "./types";
 export { ThemeAlgorithm, ThemeMode } from "./types";
+export { styled };

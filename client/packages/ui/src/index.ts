@@ -6,3 +6,4 @@ export * from "./types";
 export * from "./query";
 export * from "./utils";
 export * from "./formats";
+export * from "./components";

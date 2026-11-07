@@ -1,13 +1,22 @@
 import { useState, useEffect } from "react";
+import { getExtensionsRegistry } from "@bi-metrics/core";
 import rison from "rison";
 import { useIsMobile } from "../../hooks";
 import { WelcomeContainer } from "./ui/components";
 import { userHasPermission } from "../../dashboard/utils";
+import { redirect } from "../../utils";
+import { UserWithPermissionsAndRoles } from "../../types";
+import withToasts from "../../components/Toast/withToast";
+
+import { WelcomeExtensionInner } from "./WelcomeExtensionInner";
+import { WelcomeExtensionInnerItemsConverter } from "./WelcomeExtensionInnerItemsConverter";
 
 interface WelcomeProps {
   user: any;
   addDangerToast: (arg0: string) => void;
 }
+
+const extensionsRegistry = getExtensionsRegistry();
 
 function Welcome({ user, addDangerToast }: WelcomeProps) {
   const isDesktop = !useIsMobile();
@@ -28,6 +37,20 @@ function Welcome({ user, addDangerToast }: WelcomeProps) {
   );
   const [isFetchingActivityData, setIsFetchingActivityData] = useState(true);
 
+  const [activeState, setActiveState] = useState<Array<string>>(collapseState);
+
+  const handleCollapse = (state: Array<string>) => {
+    setActiveState(state);
+    setItem(LocalStorageKeys.HomepageCollapseState, state);
+  };
+
+  const WelcomeTopExtension = extensionsRegistry.get("welcome.banner");
+  const WelcomeMainExtension = extensionsRegistry.get(
+    "welcome.main.replacement",
+  );
+
+  const welcomeExtensionInnerItems = WelcomeExtensionInnerItemsConverter();
+
   return (
     <>
       {SubmenuExtension ? (
@@ -35,7 +58,15 @@ function Welcome({ user, addDangerToast }: WelcomeProps) {
       ) : (
         <SubMenu {...menuData} />
       )}
-      <WelcomeContainer></WelcomeContainer>
+      <WelcomeContainer>
+        {(!WelcomeTopExtension || !WelcomeMainExtension) && (
+          <WelcomeExtensionInner
+            activeState={activeState}
+            handleCollapse={handleCollapse}
+            items={welcomeExtensionInnerItems}
+          />
+        )}
+      </WelcomeContainer>
     </>
   );
 }
