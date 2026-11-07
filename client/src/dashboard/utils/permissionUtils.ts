@@ -1,7 +1,20 @@
-import type {
-  UndefinedUser,
-  UserWithPermissionsAndRoles,
+import {
+  isUserWithPermissionsAndRoles,
+  type UndefinedUser,
+  type UserWithPermissionsAndRoles,
 } from "../../types/bootStrapTypes";
+import getBootstrapData from "../../utils/bootstrap";
+
+const bootstrapData = getBootstrapData();
+const ADMIN_ROLE_NAME = bootstrapData.common?.conf?.AUTH_ROLE_ADMIN || "Admin";
+
+export const isUserAdmin = (
+  user?: UserWithPermissionsAndRoles | UndefinedUser,
+) =>
+  isUserWithPermissionsAndRoles(user) &&
+  Object.keys(user.roles || {}).some(
+    (role) => role.toLowerCase() === ADMIN_ROLE_NAME.toLowerCase(),
+  );
 
 export function userHasPermission(
   user: UserWithPermissionsAndRoles | UndefinedUser,
@@ -10,7 +23,7 @@ export function userHasPermission(
 ) {
   return (
     isUserAdmin(user) ||
-    (isUserWithPermissionAndRoles(user) &&
+    (isUserWithPermissionsAndRoles(user) &&
       Object.values(user.roles || {})
         .flat()
         .some(

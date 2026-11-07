@@ -6,6 +6,7 @@ import {
   SAFE_PATH_PARSE_BASE,
   SAFE_PATH_PARSE_ORIGIN,
 } from "./constants";
+import { ensureAppRoot } from "./path";
 
 interface NavigateToOptions {
   newWindow?: boolean;
@@ -37,7 +38,9 @@ export function navigateTo({ url, options }: NavigateToProps): void {
   const target = ensureAppRoot(url);
 
   const routerRelativeFastPath =
-    target.startWith("/") && !target.startsWith("//") && !target.includes("\\");
+    target.startsWith("/") &&
+    !target.startsWith("//") &&
+    !target.includes("\\");
 
   if (routerRelativeFastPath) {
     let parsed: URL | null;
@@ -102,15 +105,15 @@ export function navigateTo({ url, options }: NavigateToProps): void {
     !parsed.password;
 
   if (parsedSafeNavigationUrlCondition) {
-    const safeExternal = parsed.href;
+    const safeExternal = parsed?.href;
     if (options?.newWindow) {
       window.open(safeExternal, "_blank", NEW_TAB_FEATURES);
     } else if (options?.assign) {
-      if (!shouldSkipDuplicateAssign(safeExternal)) {
-        window.location.assign(safeExternal);
+      if (!shouldSkipDuplicateAssign(safeExternal!)) {
+        window.location.assign(safeExternal!);
       }
     } else {
-      window.location.href = safeExternal;
+      window.location.href = safeExternal!;
     }
     return;
   }

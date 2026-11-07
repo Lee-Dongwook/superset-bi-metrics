@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import rison from "rison";
 import { useIsMobile } from "../../hooks";
 import { WelcomeContainer } from "./ui/components";
+import { userHasPermission } from "../../dashboard/utils";
 
 interface WelcomeProps {
   user: any;

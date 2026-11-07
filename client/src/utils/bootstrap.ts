@@ -1,4 +1,19 @@
+import { DEFAULT_BOOTSTRAP_DATA } from "../constants";
+import type { BootstrapData } from "../types";
 import { APP_ROOT_PATH_RE } from "./constants";
+
+let cachedBootstrapData: BootstrapData | null = null;
+
+export default function getBootstrapData(): BootstrapData {
+  if (cachedBootstrapData === null) {
+    const appContainer = document.getElementById("app");
+    const dataBootstrap = appContainer?.dataset.bootstrap;
+    cachedBootstrapData = dataBootstrap
+      ? JSON.parse(dataBootstrap)
+      : DEFAULT_BOOTSTRAP_DATA;
+  }
+  return cachedBootstrapData ?? DEFAULT_BOOTSTRAP_DATA;
+}
 
 const normalizePathWithFallback = (
   path: string | undefined,

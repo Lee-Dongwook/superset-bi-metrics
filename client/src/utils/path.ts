@@ -1,3 +1,4 @@
+import { applicationRoot } from "./bootstrap";
 import { PROTOCOL_RELATIVE_LIKE_RE, SAFE_ABSOLUTE_URL_RE } from "./constants";
 
 export function ensureAppRoot(path: string | null | undefined): string {

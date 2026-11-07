@@ -1,5 +1,6 @@
 import { TimeLocaleDefinition } from "d3-time-format";
 import { FormatLocaleDefinition } from "d3-format";
+import { isPlainObject } from "lodash-es";
 import type {
   JsonObject,
   FeatureFlagMap,
@@ -137,4 +138,14 @@ export interface BootstrapData {
     allowed_domains?: string[];
   };
   requested_query?: JsonObject;
+}
+
+export function isUser(user: any): user is User {
+  return isPlainObject(user) && "username" in user;
+}
+
+export function isUserWithPermissionsAndRoles(
+  user: any,
+): user is UserWithPermissionsAndRoles {
+  return isUser(user) && "permissions" in user && "roles" in user;
 }
