@@ -1,6 +1,22 @@
-import type { ReactNode, ComponentType, ReactElement } from "react";
-import type { BackgroundPosition } from "./ImageLoader";
-// import { useTheme } from "../../theme";
+import type { ComponentType, FC, ReactElement, ReactNode } from "react";
+import { sanitizeUrl } from "@braintree/sanitize-url";
+import { SafetyCertificateFilled } from "@ant-design/icons";
+import { Card, Skeleton, Tooltip } from "antd";
+import { useTheme } from "../../theme";
+import { t } from "../../translation";
+import { ImageLoader, type BackgroundPosition } from "./ImageLoader";
+import {
+  ActionsWrapper,
+  Cover,
+  CoverFooter,
+  CoverFooterLeft,
+  CoverFooterRight,
+  StyledCard,
+  ThinSkeleton,
+  TitleContainer,
+  TitleLink,
+  TitleRight,
+} from "./components";
 
 export interface LinkProps {
   to: string;
@@ -28,6 +44,12 @@ interface ListViewCardProps {
   certificationDetails?: string;
 }
 
+const AnchorLink: FC<LinkProps> = ({ to, children }) => (
+  <a href={to !== undefined ? sanitizeUrl(to) : undefined}>{children}</a>
+);
+
+const paragraphConfig = { rows: 1, width: 150 };
+
 function ListViewCard({
   title,
   subtitle,
@@ -47,10 +69,112 @@ function ListViewCard({
   certifiedBy,
   certificationDetails,
 }: ListViewCardProps) {
-  // const Link = url && linkComponent ? linkComponent : AnchorLink;
-  // const theme = useTheme();
-  // return <StyledCard></StyledCard>;
+  const Link = url && linkComponent ? linkComponent : AnchorLink;
+  const theme = useTheme();
+
+  return (
+    <StyledCard
+      data-test="styled-card"
+      padded
+      cover={
+        cover || (
+          <Cover>
+            <Link to={url!}>
+              <div className="gradient-container">
+                <ImageLoader
+                  src={imgURL || ""}
+                  fallback={imgFallbackURL || ""}
+                  isLoading={loading}
+                  position={imgPosition}
+                />
+              </div>
+            </Link>
+            <CoverFooter className="cover-footer">
+              {!loading && coverLeft && (
+                <CoverFooterLeft>{coverLeft}</CoverFooterLeft>
+              )}
+              {!loading && coverRight && (
+                <CoverFooterRight>{coverRight}</CoverFooterRight>
+              )}
+            </CoverFooter>
+          </Cover>
+        )
+      }
+    >
+      {loading ? (
+        <Card.Meta
+          data-test="skeleton-card"
+          title={
+            <TitleContainer>
+              <Skeleton.Input
+                active
+                size="small"
+                style={{ width: Math.trunc(theme.sizeUnit * 62.5) }}
+              />
+              <div className="card-actions">
+                <Skeleton.Button active shape="circle" />{" "}
+                <Skeleton.Button active style={{ width: theme.sizeUnit * 10 }} />
+              </div>
+            </TitleContainer>
+          }
+          description={
+            <ThinSkeleton
+              round
+              active
+              title={false}
+              paragraph={paragraphConfig}
+            />
+          }
+        />
+      ) : (
+        <Card.Meta
+          title={
+            <TitleContainer>
+              {subtitle || null}
+              <div className="titleRow">
+                <Tooltip title={title}>
+                  <TitleLink>
+                    {certifiedBy && (
+                      <>
+                        <Tooltip
+                          title={
+                            <>
+                              {t("Certified by %s", certifiedBy)}
+                              {certificationDetails && (
+                                <div>{certificationDetails}</div>
+                              )}
+                            </>
+                          }
+                        >
+                          <SafetyCertificateFilled
+                            style={{ color: theme.colorPrimary }}
+                          />
+                        </Tooltip>{" "}
+                      </>
+                    )}
+                    {title}
+                  </TitleLink>
+                </Tooltip>
+                {titleRight && (
+                  <Tooltip title={titleRight}>
+                    <TitleRight>{titleRight}</TitleRight>
+                  </Tooltip>
+                )}
+                <div className="card-actions" data-test="card-actions">
+                  {actions}
+                </div>
+              </div>
+            </TitleContainer>
+          }
+          description={description}
+          avatar={avatar || null}
+        />
+      )}
+    </StyledCard>
+  );
 }
 
-export { ListViewCard };
+ListViewCard.Actions = ActionsWrapper;
+
+export { ListViewCard, ImageLoader };
 export type { ListViewCardProps };

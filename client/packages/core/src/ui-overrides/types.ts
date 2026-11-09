@@ -25,5 +25,6 @@ export interface SubMenuProps {
 export type Extensions = Partial<{
   "home.submenu": ComponentType<SubMenuProps>;
   "welcome.banner": ComponentType;
+  "welcome.message": ComponentType;
   "welcome.main.replacement": ComponentType;
 }>;

@@ -90,6 +90,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@ant-design/icons": "^6.3.4",
     "@braintree/sanitize-url": "^7.1.2",
     "@emotion/cache": "^11.14.0",
     "@emotion/react": "^11.14.0",

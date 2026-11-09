@@ -33,3 +33,16 @@ export function userHasPermission(
         ))
   );
 }
+
+// ponytail: matches editors by user id; switch to subject ids once
+// SubjectPile/subjects are ported.
+export const isUserEditorOrAdmin = (
+  user?: UserWithPermissionsAndRoles | UndefinedUser,
+  editors: { id: number }[] = [],
+  extraEditors: number[] = [],
+) =>
+  isUserAdmin(user) ||
+  (isUserWithPermissionsAndRoles(user) &&
+    user.userId != null &&
+    (editors.some(({ id }) => id === user.userId) ||
+      extraEditors.includes(user.userId)));

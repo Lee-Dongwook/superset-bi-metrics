@@ -27,6 +27,7 @@ export enum FeatureFlag {
   DisableEmbeddedSupersetLogout = "DISABLE_EMBEDDED_SUPERSET_LOGOUT",
   ScheduledQueries = "SCHEDULED_QUERIES",
   MobileConsumptionMode = "MOBILE_CONSUMPTION_MODE",
+  Thumbnails = "THUMBNAILS",
 }
 
 export type ScheduleQueriesProps = {

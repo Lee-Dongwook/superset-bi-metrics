@@ -1,10 +1,7 @@
 import { styled } from "@bi-metrics/core/theme";
+import { ListViewCard } from "@bi-metrics/core/components";
 import { mq, loadingCardCount } from "../../../utils";
 import { isMobileConsumptionEnabled } from "../../../hooks";
-
-interface LoadingProps {
-  cover?: boolean;
-}
 
 export const WelcomeContainer = styled.div`
   background: ${({ theme }) => theme.colorBgLayout};
@@ -30,7 +27,7 @@ export const WelcomeContainer = styled.div`
   }
 
   .ant-card-meta-description {
-    marign-top: ${({ theme }) => theme.sizeUnit}px;
+    margin-top: ${({ theme }) => theme.sizeUnit}px;
   }
 
   .ant-card.ant-card-bordered {
@@ -61,9 +58,7 @@ export const WelcomeNav = styled.div`
   `}
 `;
 
-export const CardContainer = styled.div<{
-  showThumbnails?: boolean | undefined;
-}>`
+export const CardContainer = styled.div<{ showThumbnails?: boolean }>`
   ${({ showThumbnails, theme }) => `
     overflow: hidden;
     display: grid;
@@ -91,7 +86,18 @@ export const CardContainer = styled.div<{
   `}
 `;
 
-export const LoadingCards = ({ cover }: LoadingProps) => (
+export const CardStyles = styled.div`
+  cursor: pointer;
+  a {
+    text-decoration: none;
+  }
+  .ant-card-cover > div {
+    /* 300px wide card, same aspect ratio as the 800x450 thumbnails */
+    height: 168px;
+  }
+`;
+
+export const LoadingCards = ({ cover }: { cover?: boolean }) => (
   <CardContainer showThumbnails={cover} className="loading-cards">
     {Array.from({ length: loadingCardCount }, (_, index) => (
       <ListViewCard

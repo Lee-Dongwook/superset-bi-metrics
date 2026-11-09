@@ -70,3 +70,22 @@ export function setItem<K extends LocalStorageKeys>(
 ): void {
   dangerouslySetItemDoNotUse(key, value);
 }
+
+export function dangerouslyGetItemDoNotUse(
+  key: string,
+  defaultValue: any,
+): any {
+  try {
+    const value = localStorage.getItem(key);
+    return value === null ? defaultValue : JSON.parse(value);
+  } catch {
+    return defaultValue;
+  }
+}
+
+export function getItem<K extends LocalStorageKeys>(
+  key: K,
+  defaultValue: LocalStorageValues[K],
+): LocalStorageValues[K] {
+  return dangerouslyGetItemDoNotUse(key, defaultValue);
+}

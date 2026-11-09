@@ -1,180 +1,124 @@
+import { t } from "@bi-metrics/core/translation";
+import { TableTab } from "../../constants";
+import ActivityTable from "../../features/home/ActivityTable";
+import ChartTable from "../../features/home/ChartTable";
+import DashboardTable from "../../features/home/DashboardTable";
+import SavedQueries from "../../features/home/SavedQueries";
+import type { ActivityData } from "../../features/home/ActivityData";
+import type { Filter, UserWithPermissionsAndRoles } from "../../types";
 import type { WelcomeExtensionInnerItems } from "./WelcomeExtensionInner";
-
-export enum TableTab {
-  Viewed = "Viewed",
-  Other = "Other",
-  Created = "Created",
-}
-
-export interface User {
-  userId?: string;
-  [key: string]: any;
-}
-
-export type ActivityData = Record<TableTab | string, any>;
-
-export interface ActivityTableProps {
-  user: { userId: string };
-  activeChild: any;
-  setActiveChild: (val: any) => void;
-  activityData: ActivityData;
-  isFetchingActivityData: boolean;
-}
-
-export interface LoadingCardsProps {
-  cover?: boolean;
-}
-
-export interface DashboardTableProps {
-  user: User;
-  mine: any;
-  showThumbnails: boolean;
-  otherTabData?: any;
-  otherTabFilters?: any;
-  otherTabTitle?: any;
-}
-
-export interface ChartTableProps {
-  showThumbnails: boolean;
-  user: User;
-  mine: any;
-  otherTabData?: any;
-  otherTabFilters?: any;
-  otherTabTitle?: any;
-}
-
-export interface ToastedSavedQueriesProps {
-  showThumbnails: boolean;
-  user: User;
-  mine: any;
-  featureFlag: boolean;
-}
+import { LoadingCards } from "./ui";
 
 export interface WelcomeExtensionContext {
-  t: (key: string) => string;
-  activityData?: ActivityData;
-  activeChild: any;
-  setActiveChild: (val: any) => void;
+  user: UserWithPermissionsAndRoles;
+  activityData: ActivityData | null;
+  activeChild: string;
+  setActiveChild: (val: string) => void;
   isFetchingActivityData: boolean;
-  user: User;
-  dashboardData?: any;
   isRecentActivityLoading: boolean;
+  dashboardData: object[] | null;
+  chartData: object[] | null;
+  queryData: object[] | null;
   checked: boolean;
-  otherTabFilters?: any;
-  otherTabTitle?: any;
+  otherTabFilters: Filter[];
+  otherTabTitle: string;
   isNotMobile: boolean;
-  chartData?: any;
   canReadSavedQueries: boolean;
-  queryData?: any;
   isThumbnailsEnabled: boolean;
 }
 
-interface WelcomeExtensionInnerItemsProps {
-  context?: WelcomeExtensionContext;
-  [key: string]: any;
+export function WelcomeExtensionInnerItemsConverter({
+  user,
+  activityData,
+  activeChild,
+  setActiveChild,
+  isFetchingActivityData,
+  isRecentActivityLoading,
+  dashboardData,
+  chartData,
+  queryData,
+  checked,
+  otherTabFilters,
+  otherTabTitle,
+  isNotMobile,
+  canReadSavedQueries,
+  isThumbnailsEnabled,
+}: WelcomeExtensionContext): WelcomeExtensionInnerItems[] {
+  const items: WelcomeExtensionInnerItems[] = [
+    {
+      key: "recents",
+      label: t("Recents"),
+      children:
+        activityData &&
+        (activityData[TableTab.Viewed] ||
+          activityData[TableTab.Other] ||
+          activityData[TableTab.Created]) &&
+        activeChild !== "Loading" ? (
+          <ActivityTable
+            user={{ userId: user.userId! }}
+            activeChild={activeChild}
+            setActiveChild={setActiveChild}
+            activityData={activityData}
+            isFetchingActivityData={isFetchingActivityData}
+          />
+        ) : (
+          <LoadingCards />
+        ),
+    },
+    {
+      key: "dashboards",
+      label: t("Dashboards"),
+      children:
+        !dashboardData || isRecentActivityLoading ? (
+          <LoadingCards cover={checked} />
+        ) : (
+          <DashboardTable
+            user={user}
+            mine={dashboardData}
+            showThumbnails={checked}
+            otherTabData={activityData?.[TableTab.Other]}
+            otherTabFilters={otherTabFilters}
+            otherTabTitle={otherTabTitle}
+          />
+        ),
+    },
+  ];
+
+  // charts and saved queries are hidden in mobile consumption mode
+  if (isNotMobile) {
+    items.push({
+      key: "charts",
+      label: t("Charts"),
+      children:
+        !chartData || isRecentActivityLoading ? (
+          <LoadingCards cover={checked} />
+        ) : (
+          <ChartTable
+            showThumbnails={checked}
+            user={user}
+            mine={chartData}
+            otherTabData={activityData?.[TableTab.Other]}
+            otherTabFilters={otherTabFilters}
+            otherTabTitle={otherTabTitle}
+          />
+        ),
+    });
+  }
+  if (isNotMobile && canReadSavedQueries) {
+    items.push({
+      key: "saved-queries",
+      label: t("Saved queries"),
+      children: !queryData ? (
+        <LoadingCards cover={checked} />
+      ) : (
+        <SavedQueries
+          showThumbnails={checked}
+          user={user}
+          mine={queryData}
+          featureFlag={isThumbnailsEnabled}
+        />
+      ),
+    });
+  }
+  return items;
 }
-
-export type WelcomeExtensionInnerItemsConverterFn = (
-  props?: WelcomeExtensionInnerItemsProps,
-) => WelcomeExtensionInnerItems[];
-
-export const WelcomeExtensionInnerItemsConverter: WelcomeExtensionInnerItemsConverterFn =
-  (props) => {
-    const {
-      t,
-      activityData,
-      activeChild,
-      user,
-      setActiveChild,
-      isFetchingActivityData,
-      LoadingCards,
-      dashboardData,
-      isRecentActivityLoading,
-      checked,
-      otherTabFilters,
-      otherTabTitle,
-      isNotMobile,
-      chartData,
-      canReadSavedQueries,
-      queryData,
-      isThumbnailsEnabled,
-    } = props!;
-    return [
-      {
-        key: "recents",
-        label: t("Recents"),
-        children:
-          activityData &&
-          (activityData[TableTab.Viewed] ||
-            activityData[TableTab.Other] ||
-            activityData[TableTab.Created]) &&
-          activeChild !== "Loading" ? (
-            <ActivityTable
-              user={{ userId: user.userId! }}
-              activeChild={activeChild}
-              setActiveChild={setActiveChild}
-              activityData={activityData}
-              isFetchingActivityData={isFetchingActivityData}
-            />
-          ) : (
-            <LoadingCards />
-          ),
-      },
-      {
-        key: "dashboards",
-        label: t("Dashboards"),
-        children:
-          !dashboardData || isRecentActivityLoading ? (
-            <LoadingCards cover={checked} />
-          ) : (
-            <DashboardTable
-              user={user}
-              mine={dashboardData}
-              showThumbnails={checked}
-              otherTabData={activityData?.[TableTab.Other]}
-              otherTabFilters={otherTabFilters}
-              otherTabTitle={otherTabTitle}
-            />
-          ),
-      },
-      ...(isNotMobile
-        ? [
-            {
-              key: "charts",
-              label: t("Charts"),
-              children:
-                !chartData || isRecentActivityLoading ? (
-                  <LoadingCards cover={checked} />
-                ) : (
-                  <ChartTable
-                    showThumbnails={checked}
-                    user={user}
-                    mine={chartData}
-                    otherTabData={activityData?.[TableTab.Other]}
-                    otherTabFilters={otherTabFilters}
-                    otherTabTitle={otherTabTitle}
-                  />
-                ),
-            },
-          ]
-        : []),
-      ...(isNotMobile && canReadSavedQueries
-        ? [
-            {
-              key: "saved-queries",
-              label: t("Saved queries"),
-              children: !queryData ? (
-                <LoadingCards cover={checked} />
-              ) : (
-                <ToastedSavedQueries
-                  showThumbnails={checked}
-                  user={user}
-                  mine={queryData}
-                  featureFlag={isThumbnailsEnabled}
-                />
-              ),
-            },
-          ]
-        : []),
-    ];
-  };
