@@ -1,6 +1,12 @@
 import BiMetricsClientClass from "./class";
 
+export type JsonPrimitive = string | number | boolean | null;
+export type JsonArray = JsonValue[];
+export type JsonValue = JsonPrimitive | JsonObject | JsonArray;
 export type JsonObject = { [member: string]: any };
+export type StrictJsonValue = JsonPrimitive | StrictJsonObject | StrictJsonArray;
+export type StrictJsonArray = StrictJsonValue[];
+export type StrictJsonObject = { [member: string]: StrictJsonValue };
 
 export type FetchRetryOptionsRetryDelay =
   | number
@@ -24,11 +30,15 @@ export type FetchRetryOptions = {
   retryOn?: FetchRetryOptionsRetryOn;
 };
 
+export type Body = RequestInit["body"];
+export type Cache = RequestInit["cache"];
+export type Headers = { [k: string]: string };
 export type Payload = JsonObject | string | null;
 export type Credentials = RequestInit["credentials"];
 export type Method = RequestInit["method"];
 export type Mode = RequestInit["mode"];
 export type Signal = RequestInit["signal"];
+export type Redirect = RequestInit["redirect"];
 
 export type CsrfToken = string;
 export type Stringify = boolean;
@@ -38,6 +48,13 @@ export type Endpoint = string;
 export type Url = string;
 export type Protocol = "http:" | "https:";
 export type ClientTimeout = number | undefined;
+export type ParseMethod =
+  | "json"
+  | "json-bigint"
+  | "text"
+  | "raw"
+  | null
+  | undefined;
 
 export interface RequestBase {
   body?: Body;
@@ -54,6 +71,12 @@ export interface RequestBase {
   signal?: Signal;
   stringify?: Stringify;
   timeout?: ClientTimeout;
+}
+
+export interface CallApi extends RequestBase {
+  url: Url;
+  cache?: Cache;
+  redirect?: Redirect;
 }
 
 export interface RequestWithEndpoint extends RequestBase {
@@ -103,7 +126,7 @@ export interface BiMetricsClientInterface extends Pick<
   | "put"
   | "request"
   | "init"
-  | "isAutenticated"
+  | "isAuthenticated"
   | "reAuthenticate"
   | "getGuestToken"
   | "getUrl"
@@ -113,3 +136,5 @@ export interface BiMetricsClientInterface extends Pick<
   getCSRFToken: () => CsrfPromise;
   guestTokenHeaderName?: string;
 }
+
+export type BiMetricsClientResponse = Response | JsonResponse | TextResponse;

@@ -8,9 +8,15 @@ export const HTTP_STATUS_UNAUTHORIZED = 401;
 export const CSRF_ERROR_TYPE = "CSRF_ERROR";
 
 export const CACHE_AVAILABLE = "caches" in window;
+export const CACHE_KEY = "@BI-METRICS/CONNECTION";
 
 export const DEFAULT_FETCH_RETRY_OPTIONS: FetchRetryOptions = {
   retries: 3,
   retryDelay: 1000,
   retryOn: [502, 503, 504],
+};
+
+export const COMMON_ERR_MESSAGES = {
+  SESSION_TIMED_OUT:
+    "Your session timed out, please refresh your page and try again.",
 };
