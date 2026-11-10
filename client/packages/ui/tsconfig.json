@@ -4,7 +4,8 @@
     "paths": { "@bi-metrics/ui/*": ["./src/*"], "*": ["../../*"] },
     "outDir": "lib",
     "rootDir": "src",
-    "declarationDir": "lib"
+    "declarationDir": "lib",
+    "jsxImportSource": "@emotion/react"
   },
   "include": ["src/**/*", "types/**/*"],
   "exclude": ["src/**/*.test.*", "src/**/*.stories.*", "src/__mocks__"]

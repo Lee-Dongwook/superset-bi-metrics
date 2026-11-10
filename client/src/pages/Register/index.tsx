@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useParams } from "react-router-dom";
 import getBootstrapData from "../../utils/bootstrap";
 import { BiMetricsClient } from "@bi-metrics/core";
-import { Form } from "@bi-metrics/ui";
+import { Form, Button, Card, Flex, Input, Result } from "@bi-metrics/ui";
 
 interface RegisterForm {
   username: string;
